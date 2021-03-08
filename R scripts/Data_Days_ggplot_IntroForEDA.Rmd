@@ -1,0 +1,483 @@
+---
+title: "Data Days ggplot Intro for EDA"
+subtitle: By Kees Schipper
+output: html_notebook
+---
+
+Notes: The purpose of this script is to introduce the ggplot package. This 
+introduction will go through creating the base ggplot, attaching data to your
+plot, setting aesthetics, working with basic color schemes and palettes,
+facetting, facet grids, plotting multiple variables, and the geometries
+for line plots, smoothers, scatterplots, boxplots, bar plots, histograms,
+jittering, heatmaps. Culminating in plotting a 
+regression model with confidence intervals
+
+
+
+# Clear environment and plotting window -----------------------------------
+
+```{r setup, echo = TRUE, message=FALSE}
+knitr::opts_chunk$set(fig.pos = "!h")
+rm(list = ls())
+# set working directory to the Data Days output folder, or wherever your data is stored
+setwd("C:/Users/keess/Box/ASA Share/ASA 2020/ASA Meetings/Data Days Spring 2021/Data Days output")
+library(tidyverse)
+```
+
+
+
+## Starting with the Diamonds dataset in tidyverse ---------------------------------
+
+```{r loading data}
+df <- diamonds
+head(df)
+```
+
+### How does ggplot work?
+ggplot stands for "grammar of graphics" plot, and the package breaks down plotting into a layered system consisting of global settings using the function `ggplot()`, one or more geometries called geoms (`geom_boxplot`, `geom_point`, `geom_line`), and finishing with themes, layouts, text, color schemes, and other design features that make ggplots extremely flexible. We'll try a simple scatterplot to start with.
+
+
+```{r first ggplot}
+# simple scatterplots of diamond price by carat
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point()
+```
+Here we see a simple scatterplot of the relationship of diamond price by carat. The `aes()` stands for aesthetic, which means that we are mapping data to the ggplot's x or y aesthetic. There are a lot of points here, so we can use one of geom_point's settings `alpha` to make our points more transparent. This is one of the ways to check on the density of points in a scatterplot when we have overplotted.
+
+```{r overplotting solution}
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(alpha = 0.1)
+```
+
+
+like I said before, ggplot is a layered graphics system, so we can add geometries on top of our already present layers
+
+```{r smoother}
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(alpha = 0.1) + 
+  geom_smooth(method = 'loess', se = F)
+```
+The smoother fits pretty well where there are a lot of data points, but the ending piece is a bit nonsensical because of the lack of data points. We might want to consider reducing our x limit so that we are focusing on areas with a lot of data
+
+
+we can also split our data up by faceting, which is splitting up our plots by category
+```{r faceting smoothers}
+p_smooth + facet_wrap(~cut)
+```
+
+
+
+here we split our plot up by different cuts. I've also shown the layered nature of ggplot, where graphing elements are added one on top of the other. If we were to write that whole plot out using code (and adding labels) it would look like this:
+
+```{r}
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = 'loess', se = F) +
+  facet_wrap(~cut) +
+  labs(title = "Price vs. Carat, Faceted by Diamond Cut",
+       x = 'Carat', y = 'Price', subtitle = "ggplot tutorial for EDA",
+       caption = "By Kees Schipper")
+```
+
+
+# Now let's do the same layered process for a boxplot ---------------------
+
+### start by simply looking at the distribution of price in our entire dataset
+```{r}
+df %>%
+  ggplot(aes(y = price)) +
+  geom_boxplot()
+```
+
+### clearly not very informative. Let's split price into cut
+```{r}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot()
+```
+
+
+
+this gives us a little more information, but we can improve on our boxplot aesthetics with notches and outlier colors
+```{r}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(notch = TRUE, outlier.color = 'blue', fill = 'grey40')
+```
+
+we can increase the dimensions accross which we visualize our data by adding facets again. Let's look at the relationship between cut and price, split by clarity
+```{r}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(outlier.color = 'blue') +
+  facet_wrap(~clarity)
+```
+
+
+
+here our notches aren't especially useful, and we also see that labels tend to overlap we could try flipping our axes, which usually gives more room for each x axis label
+```{r}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(outlier.color = 'blue') +
+  facet_wrap(~clarity) +
+  coord_flip()
+```
+
+
+this is still a little confusing but at least the labels don't overlap! Finally, we can add labels. Also, let's keep the coordinates as they were originally, but we can use the ggplot `theme` to tilt our x labels
+```{r}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(outlier.color = 'blue') +
+  facet_wrap(~clarity) +
+  theme(axis.text.x = element_text(hjust = 1, angle = 45)) +
+  labs(title = "Price of Different Diamond Cuts, Stratified by Clarity")
+```
+
+
+
+I almost forgot! We can also add summary statistics to our boxplot with stat_summary() we can also look at adding jitter so that we can see individual data points in our plots, and get a better visual of the distribution of points
+```{r boxplotWjitter, warning = FALSE}
+df %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(outlier.color = 'blue') +
+  stat_summary(fun = 'mean', col = 'red', size = 0.2) +
+  geom_jitter(color = 'brown', alpha = 0.02) +
+  facet_wrap(~clarity) +
+  theme(axis.text.x = element_text(hjust = 1, angle = 45)) +
+  labs(title = "Price of Different Diamond Cuts, Stratified by Clarity")
+```
+
+
+
+# Now we can look at histograms and density plots -------------------------
+
+
+```{r}
+df %>%
+  ggplot(aes(x = price)) +
+  geom_histogram(bins = 200) # specify number of bins to increase detail in distribution
+```
+Like with other plots, we can color, facet, group, etc... but now we can also stack different categories using a `position` argument
+```{r}
+df %>%
+  ggplot(aes(x = price, fill = cut)) +
+  geom_histogram(bins = 200, position = 'stack')
+```
+other position arguments are `dodge` and `fill`. I'll leave it to the reader to test these out and see what these do. `dodge` is better used with bar plots (not histograms) and fill is good for examining proportions, as we shall soon see
+
+
+
+The above visual isn't super useful if we're trying to see the proportions of each cut that make up the distribution, let's try changing the `fill` argument
+```{r}
+df %>%
+  ggplot(aes(x = price, fill = cut)) +
+  geom_histogram(bins = 200, position = 'fill')
+```
+
+now we can see the relative proportions of what diamonds make up which price
+however, the jitteriness of this plot still isn't fantastic. This is where
+density plots come in
+```{r}
+df %>%
+  ggplot(aes(x = price, fill = cut)) +
+  geom_density(alpha = 0.25, color = "black")
+```
+
+
+
+Here we can visualize the smoothed shape of multiple distributions. However, it's hard to see the different distributions when they're one on top of the other. Let's try stacking instead
+```{r}
+df %>%
+  ggplot(aes(x = price, fill = cut)) +
+  geom_density(position = 'stack')
+```
+
+slightly better, but we still run into the same problem where we get a good picture of the entire distribution, but proportions of cut for each price are still difficult to distinguish. We can now see what `fill` does.
+```{r}
+df %>%
+  ggplot(aes(x = price, fill = cut)) +
+  geom_density(position = 'fill', color = "black")
+```
+
+
+
+Interestingly, all diamond cuts except for fair have a dip in the price range of around 4000-5000. Maybe this is because jewlers tend to start charging at around 5000, and don't bother with mid-range prices.
+
+A geom halfway between histograms and the densit plot is the 'geom_freqpoly' which makes a frequency polygon with jagged edges matching a given number of bins. However, I don't believe you can give freqpoly a fill
+```{r}
+df %>%
+  ggplot(aes(x = price, color = cut)) +
+  geom_freqpoly(bins = 50, size = 1) +
+  scale_color_hue()
+```
+
+# some other geoms that may be worth trying -------------------------------
+```{r}
+# geom hex
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_hex() +
+  scale_fill_viridis_c()
+
+# geom_density_2d
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_density_2d()
+
+# geom_density_2d_fill
+df %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_density_2d_filled() +
+  geom_density_2d(color = "black") +
+  ylim(0, 6000) +
+  xlim(0, 1)
+
+# violin plots
+df %>%
+  ggplot(aes(x = cut, y = price, fill = cut)) +
+  geom_violin() +
+  facet_wrap(~clarity)
+```
+
+These two geoms are useful for setting vertical and horizontal reference lines in time series, when checking model residuals...
+`?geom_hline`
+`?geom_vline`
+
+for all of the geoms, you can type geom_<TAB> and scroll through the autocomplete to see what is available. There are also a bunch of other ggplot-based packages that have some cool premade graphs for individuals to take advantage of. `ggpairs` creates a panel plot matrix to compare relationships between variables within a dataset, calculating correlation coefficients and histograms along the diagonal. `sjPlot` has a lot of really cool plots for comparing model parameters (which I've used extensively). There's also `ggridges`, which creates a ridgeline plot to compare multiple distributions, time series curves, or other curves along the same x axis.
+
+The below example was taken from the following weblink: https://www.r-graph-gallery.com/294-basic-ridgeline-plot.html
+```{r}
+# library
+library(ggridges)
+library(ggplot2)
+ 
+# Diamonds dataset is provided by R natively
+#head(diamonds)
+ 
+# basic example
+ggplot(diamonds, aes(x = price, y = cut, fill = cut)) +
+  geom_density_ridges() +
+  theme_ridges() + 
+  theme(legend.position = "none")
+```
+# Here's some code for making visualizations with COVID data
+I didn't get to annotating, so feel free to take a look and see what you like! I'm probably not going to go through this section in the workshop, as it involves a lot of data cleaning, which isn't the point of introduction to ggplot. Take a look at the pivot sections, as having your data in long format is key to having versatile data for ggplot.
+```{r workingWCOVIDData, warning = F, message = F}
+# read in data ------------------------------------------------------------
+# load in COVID data for all counties across the united states
+load('../Data Days output/COVID_master_20200218.RData')
+
+# select a county or state that you're interested in:
+MACovid <- COVID_master %>%
+            filter(state == "Massachusetts" & Population > 0) %>%
+            group_by(date) %>%
+            summarise(across(where(is.numeric), ~sum(.x, na.rm = T))) %>%
+  select(date, cases, deaths:daily_deaths_100k)
+# we now have data for the entire state of Massachusetts. If you want to work with
+# a different state, change Massachusetts to whatever state that interests you!
+
+
+# simple visualizations of the data ---------------------------------------
+# let's examine a scatterplot of cases in Massachusetts compared to deaths
+
+# this is about as simple a ggplot as you can get. 
+ggplot(data = MACovid, aes(x = daily_cases, y = daily_deaths)) +
+  geom_point()
+
+# your ggplot specifies global options, so you don't have to specify aesthetics
+# in your added geometries. This has benefits and drawbacks...
+
+# We can also store this as a ggplot object and add to it
+p <- ggplot(data = MACovid, aes(x = daily_cases, y = daily_deaths))
+# p for plot
+p # gives us an empty plot with scales corresponding to our data
+
+
+# adding to a ggplot object -----------------------------------------------
+
+# let's add some points, and a line showing the relationship of our points:
+p +
+  geom_point() +
+  geom_smooth(se = T, span = 0.2, method = "loess", color = 'red') +
+  labs(title = "COVID Deaths vs. Cases")
+
+# geom_smooth does a simple loess smoother by default, over our data. Note:
+# you don't actually need to plot your points to get a smoother, R knows what
+# data you are using, so the smoother is only dependent on your data, not the
+# plots that you have in ggplot beforehand
+
+# methods of geom_smooth include linear models (lm) loess, and generalized 
+# additve models (gam)
+
+
+# boxplots ----------------------------------------------------------------
+# I'm interested in differences of case and death counts by weekday. Let's get a
+# variable for that
+
+MAWeekday <- MACovid %>%
+  mutate(weekday = factor(weekdays(date)))
+
+summary(MAWeekday$weekday) # now each observation corresponds to a weekday
+
+# let's plot case counts by weekday
+MAWeekday %>%
+  ggplot(aes(x = weekday, y = daily_cases)) +
+  geom_boxplot() +
+  stat_summary(fun = 'mean', color = 'red', geom = 'point')
+# now we have boxplots of cases by weekday. We can also add a mean value indicator
+# with stat_summary()
+
+# If we like color, we could color weekdays differently
+MAWeekday %>%
+  ggplot(aes(x = weekday, y = daily_cases, fill = weekday)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(color = "blue", alpha = 0.2) +
+  stat_summary(fun = 'mean', color = 'red', geom = 'point')
+
+# note the difference between specifying color in the aes() function vs in the general
+# gemetry. aes() maps a data value to an inherent aspect of ggplot. Therefore, each
+# different value of weekday returns a different color. If you specify color or fill
+# outside of aes, that singular color is applied to all of the fills and/or colors for 
+# that geometry.
+
+
+# some other interesting geometries ---------------------------------------
+# let's accumulate data by week first
+week <- 1
+daycount <- 0
+MAWeekday$week <- 0
+for (i in 1:nrow(MAWeekday)){
+  MAWeekday$week[i] <- week
+  daycount <- daycount + 1
+  
+  if (daycount == 7){
+    
+    daycount <- 1
+    week <- week + 1
+    
+  }
+}
+# create a count of weeks
+
+MAWeek <- MAWeekday %>%
+  select(cases, deaths, daily_cases:week) %>%
+  group_by(week) %>%
+  summarise(across(is.numeric, sum))
+
+# line graphs
+MAWeek %>%
+  ggplot(aes(x = week)) +
+  geom_line(aes(y = daily_cases), size = 1, col = "blue") +
+  geom_line(aes(y = daily_deaths), size = 1, col = "red") +
+  labs(title = "Comparing Cases and Deaths in Massachusetts")
+
+# geom histogram
+MACovid %>%
+  ggplot(aes(x = daily_cases)) +
+  geom_histogram(bins = 70)
+
+# can even stack histograms 
+MACovid %>%
+  pivot_longer(cols = c('daily_cases', 'daily_deaths'),
+               names_to = 'outcome',
+               values_to = 'values') %>%
+  ggplot() +
+  geom_histogram(aes(x = values, fill = outcome), position = "stack", bins = 30, col = "blue") 
+
+# not the greatest visualization. Let's use a frequency polygon to compare distributions
+MACovid %>%
+  pivot_longer(cols = c('daily_cases', 'daily_deaths'),
+               names_to = 'outcome',
+               values_to = 'values') %>%
+  ggplot() +
+  geom_freqpoly(aes(x = values, color = outcome), size = 1, bins = 50) +
+  labs(title = "Now we can see both distributions")
+
+
+# can even use a density plot as an overlay -------------------------------
+
+MAWeekday %>%
+  ggplot() +
+  geom_density(aes(x = daily_cases, group = weekday, color = weekday), size = 1) +
+  labs(title = "Daily case count density functions by weekday--Hard to see")
+
+
+# Let's facet! ------------------------------------------------------------
+# faceting lets us separate our plots by a factor or character value
+MAWeekday %>%
+  ggplot() +
+  geom_density(aes(x = daily_cases, group = weekday, color = weekday), size = 1) +
+  facet_wrap(~weekday) +
+  labs(title = "Faceted case counts by weekday--much clearer!!")
+
+# let's look at other variables
+MAWeekday %>%
+  ggplot() +
+  geom_density(aes(x = parks, group = weekday, color = weekday), size = 1) +
+  facet_wrap(~weekday) +
+  labs(title = "Faceted park mobility by weekday") +
+  theme(legend.position = "none") # after faceting, we don't need a legend anymore!
+
+
+# Let's look at a heatmap/density map -------------------------------------
+
+MAWeekday %>%
+  ggplot(aes(x = daily_cases, y = daily_deaths)) +
+  geom_density_2d_filled() +
+  geom_density_2d(color = 'black') +
+  geom_point(color = 'black', alpha = 0.35) +
+  scale_fill_brewer(palette = "Reds") +
+  ylim(0, 100) +
+  xlim(0, 3000) +
+  facet_wrap(~weekday)
+
+# Final note on faceting --------------------------------------------------
+# if you want to facet your data by a category, your data needs to be in the
+# following format (but not in this order):
+# x column | y column | faceting column
+# because of this, often times you will have to pivot your data for faceting.
+# Let's do this to look at the relationships between deaths, cases, and mobility
+# over time
+
+facet_data <- MAWeekday %>%
+  pivot_longer(cols = c('retail_rec':'daily_deaths'),
+               names_to = 'vars',
+               values_to = 'values') %>%
+  select(date, vars, values, weekday)
+
+facet_data %>%
+  ggplot(aes(x = date, y = values)) +
+  geom_line(aes(color = vars))
+
+# see...not the most visible data. Much easier to facet
+
+facet_data %>%
+  ggplot(aes(x = date, y = values)) +
+  geom_line(aes(color = vars)) +
+  facet_wrap(~vars)
+
+# you can also facet by multiple variables. You just need to use `facet_grid` and
+# specify the column facet, and the row facet
+facet_data %>%
+  ggplot(aes(x = date, y = values)) +
+  geom_line(aes(color = vars)) +
+  facet_grid(cols = vars(vars), rows = vars(weekday), scales = 'free_y') +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+# Further resources -------------------------------------------------------
+
+# for more on visualizations in R, I always point people to the R graph gallery:
+# https://www.r-graph-gallery.com/
+# if you have an idea for a visualization, there is likely some code already in the
+# gallery that can get you started on making your final visualization. If you're stuck
+# I recommend checking it out.
+```

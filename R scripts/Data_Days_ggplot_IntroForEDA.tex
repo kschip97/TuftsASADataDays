@@ -1,0 +1,1301 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Data Days ggplot Intro for EDA},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Data Days ggplot Intro for EDA}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{By Kees Schipper}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+Notes: The purpose of this script is to introduce the ggplot package.
+This introduction will go through creating the base ggplot, attaching
+data to your plot, setting aesthetics, working with basic color schemes
+and palettes, facetting, facet grids, plotting multiple variables, and
+the geometries for line plots, smoothers, scatterplots, boxplots, bar
+plots, histograms, jittering, heatmaps. Culminating in plotting a
+regression model with confidence intervals
+
+\hypertarget{clear-environment-and-plotting-window}{%
+\section{Clear environment and plotting window
+-----------------------------------}\label{clear-environment-and-plotting-window}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{rm}\NormalTok{(}\DataTypeTok{list =} \KeywordTok{ls}\NormalTok{())}
+\CommentTok{# set working directory to the Data Days output folder, or wherever your data is stored}
+\KeywordTok{setwd}\NormalTok{(}\StringTok{"C:/Users/keess/Box/ASA Share/ASA 2020/ASA Meetings/Data Days Spring 2021/Data Days output"}\NormalTok{)}
+\KeywordTok{library}\NormalTok{(tidyverse)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{starting-with-the-diamonds-dataset-in-tidyverse}{%
+\subsection{Starting with the Diamonds dataset in tidyverse
+---------------------------------}\label{starting-with-the-diamonds-dataset-in-tidyverse}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df <-}\StringTok{ }\NormalTok{diamonds}
+\KeywordTok{head}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## # A tibble: 6 x 10
+##   carat cut       color clarity depth table price     x     y     z
+##   <dbl> <ord>     <ord> <ord>   <dbl> <dbl> <int> <dbl> <dbl> <dbl>
+## 1 0.23  Ideal     E     SI2      61.5    55   326  3.95  3.98  2.43
+## 2 0.21  Premium   E     SI1      59.8    61   326  3.89  3.84  2.31
+## 3 0.23  Good      E     VS1      56.9    65   327  4.05  4.07  2.31
+## 4 0.290 Premium   I     VS2      62.4    58   334  4.2   4.23  2.63
+## 5 0.31  Good      J     SI2      63.3    58   335  4.34  4.35  2.75
+## 6 0.24  Very Good J     VVS2     62.8    57   336  3.94  3.96  2.48
+\end{verbatim}
+
+\hypertarget{how-does-ggplot-work}{%
+\subsubsection{How does ggplot work?}\label{how-does-ggplot-work}}
+
+ggplot stands for ``grammar of graphics'' plot, and the package breaks
+down plotting into a layered system consisting of global settings using
+the function \texttt{ggplot()}, one or more geometries called geoms
+(\texttt{geom\_boxplot}, \texttt{geom\_point}, \texttt{geom\_line}), and
+finishing with themes, layouts, text, color schemes, and other design
+features that make ggplots extremely flexible. We'll try a simple
+scatterplot to start with.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# simple scatterplots of diamond price by carat}
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/first ggplot-1.pdf}
+Here we see a simple scatterplot of the relationship of diamond price by
+carat. The \texttt{aes()} stands for aesthetic, which means that we are
+mapping data to the ggplot's x or y aesthetic. There are a lot of points
+here, so we can use one of geom\_point's settings \texttt{alpha} to make
+our points more transparent. This is one of the ways to check on the
+density of points in a scatterplot when we have overplotted.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.1}\NormalTok{)}
+\NormalTok{p}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/overplotting solution-1.pdf}
+like I said before, ggplot is a layered graphics system, so we can add
+geometries on top of our already present layers
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p_smooth <-}\StringTok{ }\NormalTok{p }\OperatorTok{+}\StringTok{ }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{'loess'}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F)}
+\NormalTok{p_smooth}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ x'
+\end{verbatim}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/smoother-1.pdf}
+The smoother fits pretty well where there are a lot of data points, but
+the ending piece is a bit nonsensical because of the lack of data
+points. We might want to consider reducing our x limit so that we are
+focusing on areas with a lot of data
+
+we can also split our data up by faceting, which is splitting up our
+plots by category
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p_smooth }\OperatorTok{+}\StringTok{ }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{cut)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ x'
+\end{verbatim}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+here we split our plot up by different cuts. I've also shown the layered
+nature of ggplot, where graphing elements are added one on top of the
+other. If we were to write that whole plot out using code (and adding
+labels) it would look like this:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{method =} \StringTok{'loess'}\NormalTok{, }\DataTypeTok{se =}\NormalTok{ F) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{cut) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Price vs. Carat, Faceted by Diamond Cut"}\NormalTok{,}
+       \DataTypeTok{x =} \StringTok{'Carat'}\NormalTok{, }\DataTypeTok{y =} \StringTok{'Price'}\NormalTok{, }\DataTypeTok{subtitle =} \StringTok{"ggplot tutorial for EDA"}\NormalTok{,}
+       \DataTypeTok{caption =} \StringTok{"By Kees Schipper"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## `geom_smooth()` using formula 'y ~ x'
+\end{verbatim}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-2-1.pdf}
+
+\hypertarget{now-lets-do-the-same-layered-process-for-a-boxplot}{%
+\section{Now let's do the same layered process for a boxplot
+---------------------}\label{now-lets-do-the-same-layered-process-for-a-boxplot}}
+
+\hypertarget{start-by-simply-looking-at-the-distribution-of-price-in-our-entire-dataset}{%
+\subsubsection{start by simply looking at the distribution of price in
+our entire
+dataset}\label{start-by-simply-looking-at-the-distribution-of-price-in-our-entire-dataset}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\hypertarget{clearly-not-very-informative.-lets-split-price-into-cut}{%
+\subsubsection{clearly not very informative. Let's split price into
+cut}\label{clearly-not-very-informative.-lets-split-price-into-cut}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+this gives us a little more information, but we can improve on our
+boxplot aesthetics with notches and outlier colors
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{notch =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{outlier.color =} \StringTok{'blue'}\NormalTok{, }\DataTypeTok{fill =} \StringTok{'grey40'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+we can increase the dimensions accross which we visualize our data by
+adding facets again. Let's look at the relationship between cut and
+price, split by clarity
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.color =} \StringTok{'blue'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{clarity)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+here our notches aren't especially useful, and we also see that labels
+tend to overlap we could try flipping our axes, which usually gives more
+room for each x axis label
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.color =} \StringTok{'blue'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{clarity) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{coord_flip}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+this is still a little confusing but at least the labels don't overlap!
+Finally, we can add labels. Also, let's keep the coordinates as they
+were originally, but we can use the ggplot \texttt{theme} to tilt our x
+labels
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.color =} \StringTok{'blue'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{clarity) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{45}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Price of Different Diamond Cuts, Stratified by Clarity"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+I almost forgot! We can also add summary statistics to our boxplot with
+stat\_summary() we can also look at adding jitter so that we can see
+individual data points in our plots, and get a better visual of the
+distribution of points
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.color =} \StringTok{'blue'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_summary}\NormalTok{(}\DataTypeTok{fun =} \StringTok{'mean'}\NormalTok{, }\DataTypeTok{col =} \StringTok{'red'}\NormalTok{, }\DataTypeTok{size =} \FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{color =} \StringTok{'brown'}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.02}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{clarity) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{, }\DataTypeTok{angle =} \DecValTok{45}\NormalTok{)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Price of Different Diamond Cuts, Stratified by Clarity"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/boxplotWjitter-1.pdf}
+
+\hypertarget{now-we-can-look-at-histograms-and-density-plots--}{%
+\section{Now we can look at histograms and density plots
+-------------------------}\label{now-we-can-look-at-histograms-and-density-plots--}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{200}\NormalTok{) }\CommentTok{# specify number of bins to increase detail in distribution}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-9-1.pdf}
+Like with other plots, we can color, facet, group, etc\ldots{} but now
+we can also stack different categories using a \texttt{position}
+argument
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{200}\NormalTok{, }\DataTypeTok{position =} \StringTok{'stack'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-10-1.pdf}
+other position arguments are \texttt{dodge} and \texttt{fill}. I'll
+leave it to the reader to test these out and see what these do.
+\texttt{dodge} is better used with bar plots (not histograms) and fill
+is good for examining proportions, as we shall soon see
+
+The above visual isn't super useful if we're trying to see the
+proportions of each cut that make up the distribution, let's try
+changing the \texttt{fill} argument
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{200}\NormalTok{, }\DataTypeTok{position =} \StringTok{'fill'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-11-1.pdf}
+
+now we can see the relative proportions of what diamonds make up which
+price however, the jitteriness of this plot still isn't fantastic. This
+is where density plots come in
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{alpha =} \FloatTok{0.25}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+Here we can visualize the smoothed shape of multiple distributions.
+However, it's hard to see the different distributions when they're one
+on top of the other. Let's try stacking instead
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{position =} \StringTok{'stack'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+slightly better, but we still run into the same problem where we get a
+good picture of the entire distribution, but proportions of cut for each
+price are still difficult to distinguish. We can now see what
+\texttt{fill} does.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{position =} \StringTok{'fill'}\NormalTok{, }\DataTypeTok{color =} \StringTok{"black"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+Interestingly, all diamond cuts except for fair have a dip in the price
+range of around 4000-5000. Maybe this is because jewlers tend to start
+charging at around 5000, and don't bother with mid-range prices.
+
+A geom halfway between histograms and the densit plot is the
+`geom\_freqpoly' which makes a frequency polygon with jagged edges
+matching a given number of bins. However, I don't believe you can give
+freqpoly a fill
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{color =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_freqpoly}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{50}\NormalTok{, }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_color_hue}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-15-1.pdf}
+
+\hypertarget{some-other-geoms-that-may-be-worth-trying--}{%
+\section{some other geoms that may be worth trying
+-------------------------------}\label{some-other-geoms-that-may-be-worth-trying--}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# geom hex}
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_hex}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_viridis_c}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# geom_density_2d}
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_2d}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-16-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# geom_density_2d_fill}
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ carat, }\DataTypeTok{y =}\NormalTok{ price)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_2d_filled}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_2d}\NormalTok{(}\DataTypeTok{color =} \StringTok{"black"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{6000}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 17971 rows containing non-finite values
+## (stat_density2d_filled).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 17971 rows containing non-finite values (stat_density2d).
+\end{verbatim}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-16-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# violin plots}
+\NormalTok{df }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ cut, }\DataTypeTok{y =}\NormalTok{ price, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_violin}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{clarity)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-16-4.pdf}
+
+These two geoms are useful for setting vertical and horizontal reference
+lines in time series, when checking model residuals\ldots{}
+\texttt{?geom\_hline} \texttt{?geom\_vline}
+
+for all of the geoms, you can type geom\_ and scroll through the
+autocomplete to see what is available. There are also a bunch of other
+ggplot-based packages that have some cool premade graphs for individuals
+to take advantage of. \texttt{ggpairs} creates a panel plot matrix to
+compare relationships between variables within a dataset, calculating
+correlation coefficients and histograms along the diagonal.
+\texttt{sjPlot} has a lot of really cool plots for comparing model
+parameters (which I've used extensively). There's also
+\texttt{ggridges}, which creates a ridgeline plot to compare multiple
+distributions, time series curves, or other curves along the same x
+axis.
+
+The below example was taken from the following weblink:
+\url{https://www.r-graph-gallery.com/294-basic-ridgeline-plot.html}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# library}
+\KeywordTok{library}\NormalTok{(ggridges)}
+\KeywordTok{library}\NormalTok{(ggplot2)}
+ 
+\CommentTok{# Diamonds dataset is provided by R natively}
+\CommentTok{#head(diamonds)}
+ 
+\CommentTok{# basic example}
+\KeywordTok{ggplot}\NormalTok{(diamonds, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ price, }\DataTypeTok{y =}\NormalTok{ cut, }\DataTypeTok{fill =}\NormalTok{ cut)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_ridges}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_ridges}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Picking joint bandwidth of 458
+\end{verbatim}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# read in data ------------------------------------------------------------}
+\CommentTok{# load in COVID data for all counties across the united states}
+\KeywordTok{load}\NormalTok{(}\StringTok{'COVID_master_20200218.RData'}\NormalTok{)}
+
+\CommentTok{# select a county or state that you're interested in:}
+\NormalTok{MACovid <-}\StringTok{ }\NormalTok{COVID_master }\OperatorTok{%>%}
+\StringTok{            }\KeywordTok{filter}\NormalTok{(state }\OperatorTok{==}\StringTok{ "Massachusetts"} \OperatorTok{&}\StringTok{ }\NormalTok{Population }\OperatorTok{>}\StringTok{ }\DecValTok{0}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{            }\KeywordTok{group_by}\NormalTok{(date) }\OperatorTok{%>%}
+\StringTok{            }\KeywordTok{summarise}\NormalTok{(}\KeywordTok{across}\NormalTok{(}\KeywordTok{where}\NormalTok{(is.numeric), }\OperatorTok{~}\KeywordTok{sum}\NormalTok{(.x, }\DataTypeTok{na.rm =}\NormalTok{ T))) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(date, cases, deaths}\OperatorTok{:}\NormalTok{daily_deaths_100k)}
+\CommentTok{# we now have data for the entire state of Massachusetts. If you want to work with}
+\CommentTok{# a different state, change Massachusetts to whatever state that interests you!}
+
+
+\CommentTok{# simple visualizations of the data ---------------------------------------}
+\CommentTok{# let's examine a scatterplot of cases in Massachusetts compared to deaths}
+
+\CommentTok{# this is about as simple a ggplot as you can get. }
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ MACovid, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases, }\DataTypeTok{y =}\NormalTok{ daily_deaths)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# your ggplot specifies global options, so you don't have to specify aesthetics}
+\CommentTok{# in your added geometries. This has benefits and drawbacks...}
+
+\CommentTok{# We can also store this as a ggplot object and add to it}
+\NormalTok{p <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ MACovid, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases, }\DataTypeTok{y =}\NormalTok{ daily_deaths))}
+\CommentTok{# p for plot}
+\NormalTok{p }\CommentTok{# gives us an empty plot with scales corresponding to our data}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# adding to a ggplot object -----------------------------------------------}
+
+\CommentTok{# let's add some points, and a line showing the relationship of our points:}
+\NormalTok{p }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_smooth}\NormalTok{(}\DataTypeTok{se =}\NormalTok{ T, }\DataTypeTok{span =} \FloatTok{0.2}\NormalTok{, }\DataTypeTok{method =} \StringTok{"loess"}\NormalTok{, }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"COVID Deaths vs. Cases"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# geom_smooth does a simple loess smoother by default, over our data. Note:}
+\CommentTok{# you don't actually need to plot your points to get a smoother, R knows what}
+\CommentTok{# data you are using, so the smoother is only dependent on your data, not the}
+\CommentTok{# plots that you have in ggplot beforehand}
+
+\CommentTok{# methods of geom_smooth include linear models (lm) loess, and generalized }
+\CommentTok{# additve models (gam)}
+
+
+\CommentTok{# boxplots ----------------------------------------------------------------}
+\CommentTok{# I'm interested in differences of case and death counts by weekday. Let's get a}
+\CommentTok{# variable for that}
+
+\NormalTok{MAWeekday <-}\StringTok{ }\NormalTok{MACovid }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{weekday =} \KeywordTok{factor}\NormalTok{(}\KeywordTok{weekdays}\NormalTok{(date)))}
+
+\KeywordTok{summary}\NormalTok{(MAWeekday}\OperatorTok{$}\NormalTok{weekday) }\CommentTok{# now each observation corresponds to a weekday}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    Friday    Monday  Saturday    Sunday  Thursday   Tuesday Wednesday 
+##        56        56        56        56        56        56        57
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# let's plot case counts by weekday}
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ weekday, }\DataTypeTok{y =}\NormalTok{ daily_cases)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_summary}\NormalTok{(}\DataTypeTok{fun =} \StringTok{'mean'}\NormalTok{, }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{, }\DataTypeTok{geom =} \StringTok{'point'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-4.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# now we have boxplots of cases by weekday. We can also add a mean value indicator}
+\CommentTok{# with stat_summary()}
+
+\CommentTok{# If we like color, we could color weekdays differently}
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ weekday, }\DataTypeTok{y =}\NormalTok{ daily_cases, }\DataTypeTok{fill =}\NormalTok{ weekday)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_boxplot}\NormalTok{(}\DataTypeTok{outlier.alpha =} \DecValTok{0}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_jitter}\NormalTok{(}\DataTypeTok{color =} \StringTok{"blue"}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.2}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{stat_summary}\NormalTok{(}\DataTypeTok{fun =} \StringTok{'mean'}\NormalTok{, }\DataTypeTok{color =} \StringTok{'red'}\NormalTok{, }\DataTypeTok{geom =} \StringTok{'point'}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-5.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# note the difference between specifying color in the aes() function vs in the general}
+\CommentTok{# gemetry. aes() maps a data value to an inherent aspect of ggplot. Therefore, each}
+\CommentTok{# different value of weekday returns a different color. If you specify color or fill}
+\CommentTok{# outside of aes, that singular color is applied to all of the fills and/or colors for }
+\CommentTok{# that geometry.}
+
+
+\CommentTok{# some other interesting geometries ---------------------------------------}
+\CommentTok{# let's accumulate data by week first}
+\NormalTok{week <-}\StringTok{ }\DecValTok{1}
+\NormalTok{daycount <-}\StringTok{ }\DecValTok{0}
+\NormalTok{MAWeekday}\OperatorTok{$}\NormalTok{week <-}\StringTok{ }\DecValTok{0}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(MAWeekday))\{}
+  \KeywordTok{print}\NormalTok{(week)}
+\NormalTok{  MAWeekday}\OperatorTok{$}\NormalTok{week[i] <-}\StringTok{ }\NormalTok{week}
+\NormalTok{  daycount <-}\StringTok{ }\NormalTok{daycount }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+  
+  \ControlFlowTok{if}\NormalTok{ (daycount }\OperatorTok{==}\StringTok{ }\DecValTok{7}\NormalTok{)\{}
+    
+\NormalTok{    daycount <-}\StringTok{ }\DecValTok{1}
+\NormalTok{    week <-}\StringTok{ }\NormalTok{week }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+    
+\NormalTok{  \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1
+## [1] 1
+## [1] 1
+## [1] 1
+## [1] 1
+## [1] 1
+## [1] 1
+## [1] 2
+## [1] 2
+## [1] 2
+## [1] 2
+## [1] 2
+## [1] 2
+## [1] 3
+## [1] 3
+## [1] 3
+## [1] 3
+## [1] 3
+## [1] 3
+## [1] 4
+## [1] 4
+## [1] 4
+## [1] 4
+## [1] 4
+## [1] 4
+## [1] 5
+## [1] 5
+## [1] 5
+## [1] 5
+## [1] 5
+## [1] 5
+## [1] 6
+## [1] 6
+## [1] 6
+## [1] 6
+## [1] 6
+## [1] 6
+## [1] 7
+## [1] 7
+## [1] 7
+## [1] 7
+## [1] 7
+## [1] 7
+## [1] 8
+## [1] 8
+## [1] 8
+## [1] 8
+## [1] 8
+## [1] 8
+## [1] 9
+## [1] 9
+## [1] 9
+## [1] 9
+## [1] 9
+## [1] 9
+## [1] 10
+## [1] 10
+## [1] 10
+## [1] 10
+## [1] 10
+## [1] 10
+## [1] 11
+## [1] 11
+## [1] 11
+## [1] 11
+## [1] 11
+## [1] 11
+## [1] 12
+## [1] 12
+## [1] 12
+## [1] 12
+## [1] 12
+## [1] 12
+## [1] 13
+## [1] 13
+## [1] 13
+## [1] 13
+## [1] 13
+## [1] 13
+## [1] 14
+## [1] 14
+## [1] 14
+## [1] 14
+## [1] 14
+## [1] 14
+## [1] 15
+## [1] 15
+## [1] 15
+## [1] 15
+## [1] 15
+## [1] 15
+## [1] 16
+## [1] 16
+## [1] 16
+## [1] 16
+## [1] 16
+## [1] 16
+## [1] 17
+## [1] 17
+## [1] 17
+## [1] 17
+## [1] 17
+## [1] 17
+## [1] 18
+## [1] 18
+## [1] 18
+## [1] 18
+## [1] 18
+## [1] 18
+## [1] 19
+## [1] 19
+## [1] 19
+## [1] 19
+## [1] 19
+## [1] 19
+## [1] 20
+## [1] 20
+## [1] 20
+## [1] 20
+## [1] 20
+## [1] 20
+## [1] 21
+## [1] 21
+## [1] 21
+## [1] 21
+## [1] 21
+## [1] 21
+## [1] 22
+## [1] 22
+## [1] 22
+## [1] 22
+## [1] 22
+## [1] 22
+## [1] 23
+## [1] 23
+## [1] 23
+## [1] 23
+## [1] 23
+## [1] 23
+## [1] 24
+## [1] 24
+## [1] 24
+## [1] 24
+## [1] 24
+## [1] 24
+## [1] 25
+## [1] 25
+## [1] 25
+## [1] 25
+## [1] 25
+## [1] 25
+## [1] 26
+## [1] 26
+## [1] 26
+## [1] 26
+## [1] 26
+## [1] 26
+## [1] 27
+## [1] 27
+## [1] 27
+## [1] 27
+## [1] 27
+## [1] 27
+## [1] 28
+## [1] 28
+## [1] 28
+## [1] 28
+## [1] 28
+## [1] 28
+## [1] 29
+## [1] 29
+## [1] 29
+## [1] 29
+## [1] 29
+## [1] 29
+## [1] 30
+## [1] 30
+## [1] 30
+## [1] 30
+## [1] 30
+## [1] 30
+## [1] 31
+## [1] 31
+## [1] 31
+## [1] 31
+## [1] 31
+## [1] 31
+## [1] 32
+## [1] 32
+## [1] 32
+## [1] 32
+## [1] 32
+## [1] 32
+## [1] 33
+## [1] 33
+## [1] 33
+## [1] 33
+## [1] 33
+## [1] 33
+## [1] 34
+## [1] 34
+## [1] 34
+## [1] 34
+## [1] 34
+## [1] 34
+## [1] 35
+## [1] 35
+## [1] 35
+## [1] 35
+## [1] 35
+## [1] 35
+## [1] 36
+## [1] 36
+## [1] 36
+## [1] 36
+## [1] 36
+## [1] 36
+## [1] 37
+## [1] 37
+## [1] 37
+## [1] 37
+## [1] 37
+## [1] 37
+## [1] 38
+## [1] 38
+## [1] 38
+## [1] 38
+## [1] 38
+## [1] 38
+## [1] 39
+## [1] 39
+## [1] 39
+## [1] 39
+## [1] 39
+## [1] 39
+## [1] 40
+## [1] 40
+## [1] 40
+## [1] 40
+## [1] 40
+## [1] 40
+## [1] 41
+## [1] 41
+## [1] 41
+## [1] 41
+## [1] 41
+## [1] 41
+## [1] 42
+## [1] 42
+## [1] 42
+## [1] 42
+## [1] 42
+## [1] 42
+## [1] 43
+## [1] 43
+## [1] 43
+## [1] 43
+## [1] 43
+## [1] 43
+## [1] 44
+## [1] 44
+## [1] 44
+## [1] 44
+## [1] 44
+## [1] 44
+## [1] 45
+## [1] 45
+## [1] 45
+## [1] 45
+## [1] 45
+## [1] 45
+## [1] 46
+## [1] 46
+## [1] 46
+## [1] 46
+## [1] 46
+## [1] 46
+## [1] 47
+## [1] 47
+## [1] 47
+## [1] 47
+## [1] 47
+## [1] 47
+## [1] 48
+## [1] 48
+## [1] 48
+## [1] 48
+## [1] 48
+## [1] 48
+## [1] 49
+## [1] 49
+## [1] 49
+## [1] 49
+## [1] 49
+## [1] 49
+## [1] 50
+## [1] 50
+## [1] 50
+## [1] 50
+## [1] 50
+## [1] 50
+## [1] 51
+## [1] 51
+## [1] 51
+## [1] 51
+## [1] 51
+## [1] 51
+## [1] 52
+## [1] 52
+## [1] 52
+## [1] 52
+## [1] 52
+## [1] 52
+## [1] 53
+## [1] 53
+## [1] 53
+## [1] 53
+## [1] 53
+## [1] 53
+## [1] 54
+## [1] 54
+## [1] 54
+## [1] 54
+## [1] 54
+## [1] 54
+## [1] 55
+## [1] 55
+## [1] 55
+## [1] 55
+## [1] 55
+## [1] 55
+## [1] 56
+## [1] 56
+## [1] 56
+## [1] 56
+## [1] 56
+## [1] 56
+## [1] 57
+## [1] 57
+## [1] 57
+## [1] 57
+## [1] 57
+## [1] 57
+## [1] 58
+## [1] 58
+## [1] 58
+## [1] 58
+## [1] 58
+## [1] 58
+## [1] 59
+## [1] 59
+## [1] 59
+## [1] 59
+## [1] 59
+## [1] 59
+## [1] 60
+## [1] 60
+## [1] 60
+## [1] 60
+## [1] 60
+## [1] 60
+## [1] 61
+## [1] 61
+## [1] 61
+## [1] 61
+## [1] 61
+## [1] 61
+## [1] 62
+## [1] 62
+## [1] 62
+## [1] 62
+## [1] 62
+## [1] 62
+## [1] 63
+## [1] 63
+## [1] 63
+## [1] 63
+## [1] 63
+## [1] 63
+## [1] 64
+## [1] 64
+## [1] 64
+## [1] 64
+## [1] 64
+## [1] 64
+## [1] 65
+## [1] 65
+## [1] 65
+## [1] 65
+## [1] 65
+## [1] 65
+## [1] 66
+## [1] 66
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# create a count of weeks}
+
+\NormalTok{MAWeek <-}\StringTok{ }\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(cases, deaths, daily_cases}\OperatorTok{:}\NormalTok{week) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(week) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\KeywordTok{across}\NormalTok{(is.numeric, sum))}
+
+\CommentTok{# line graphs}
+\NormalTok{MAWeek }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ week)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ daily_cases), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ daily_deaths), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{col =} \StringTok{"red"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Comparing Cases and Deaths in Massachusetts"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-6.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# geom histogram}
+\NormalTok{MACovid }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\DataTypeTok{bins =} \DecValTok{70}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-7.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# can even stack histograms }
+\NormalTok{MACovid }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{pivot_longer}\NormalTok{(}\DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{'daily_cases'}\NormalTok{, }\StringTok{'daily_deaths'}\NormalTok{),}
+               \DataTypeTok{names_to =} \StringTok{'outcome'}\NormalTok{,}
+               \DataTypeTok{values_to =} \StringTok{'values'}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_histogram}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ values, }\DataTypeTok{fill =}\NormalTok{ outcome), }\DataTypeTok{position =} \StringTok{"stack"}\NormalTok{, }\DataTypeTok{bins =} \DecValTok{30}\NormalTok{, }\DataTypeTok{col =} \StringTok{"blue"}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-8.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# not the greatest visualization. Let's use a frequency polygon to compare distributions}
+\NormalTok{MACovid }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{pivot_longer}\NormalTok{(}\DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{'daily_cases'}\NormalTok{, }\StringTok{'daily_deaths'}\NormalTok{),}
+               \DataTypeTok{names_to =} \StringTok{'outcome'}\NormalTok{,}
+               \DataTypeTok{values_to =} \StringTok{'values'}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_freqpoly}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ values, }\DataTypeTok{color =}\NormalTok{ outcome), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{, }\DataTypeTok{bins =} \DecValTok{50}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Now we can see both distributions"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-9.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# can even use a density plot as an overlay -------------------------------}
+
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases, }\DataTypeTok{group =}\NormalTok{ weekday, }\DataTypeTok{color =}\NormalTok{ weekday), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Daily case count density functions by weekday--Hard to see"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-10.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Let's facet! ------------------------------------------------------------}
+\CommentTok{# faceting lets us separate our plots by a factor or character value}
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases, }\DataTypeTok{group =}\NormalTok{ weekday, }\DataTypeTok{color =}\NormalTok{ weekday), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{weekday) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Faceted case counts by weekday--much clearer!!"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-11.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# let's look at other variables}
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ parks, }\DataTypeTok{group =}\NormalTok{ weekday, }\DataTypeTok{color =}\NormalTok{ weekday), }\DataTypeTok{size =} \DecValTok{1}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{weekday) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Faceted case counts by weekday--much clearer!!"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{legend.position =} \StringTok{"none"}\NormalTok{) }\CommentTok{# after faceting, we don't need a legend anymore!}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-12.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Let's look at a heatmap/density map -------------------------------------}
+
+\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ daily_cases, }\DataTypeTok{y =}\NormalTok{ daily_deaths)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_2d_filled}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_density_2d}\NormalTok{(}\DataTypeTok{color =} \StringTok{'black'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{color =} \StringTok{'black'}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{0.35}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_brewer}\NormalTok{(}\DataTypeTok{palette =} \StringTok{"Reds"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{ylim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{xlim}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{3000}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{weekday)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-13.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Final note on faceting --------------------------------------------------}
+\CommentTok{# if you want to facet your data by a category, your data needs to be in the}
+\CommentTok{# following format (but not in this order):}
+\CommentTok{# x column | y column | faceting column}
+\CommentTok{# because of this, often times you will have to pivot your data for faceting.}
+\CommentTok{# Let's do this to look at the relationships between deaths, cases, and mobility}
+\CommentTok{# over time}
+
+\NormalTok{facet_data <-}\StringTok{ }\NormalTok{MAWeekday }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{pivot_longer}\NormalTok{(}\DataTypeTok{cols =} \KeywordTok{c}\NormalTok{(}\StringTok{'retail_rec'}\OperatorTok{:}\StringTok{'daily_deaths'}\NormalTok{),}
+               \DataTypeTok{names_to =} \StringTok{'vars'}\NormalTok{,}
+               \DataTypeTok{values_to =} \StringTok{'values'}\NormalTok{) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{select}\NormalTok{(date, vars, values, weekday)}
+
+\NormalTok{facet_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ date, }\DataTypeTok{y =}\NormalTok{ values)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ vars))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-14.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# see...not the most visible data. Much easier to facet}
+
+\NormalTok{facet_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ date, }\DataTypeTok{y =}\NormalTok{ values)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ vars)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\NormalTok{vars)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-15.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# you can also facet by multiple variables. You just need to use `facet_grid` and}
+\CommentTok{# specify the column facet, and the row facet}
+\NormalTok{facet_data }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ date, }\DataTypeTok{y =}\NormalTok{ values)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_line}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{color =}\NormalTok{ vars)) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{facet_grid}\NormalTok{(}\DataTypeTok{cols =} \KeywordTok{vars}\NormalTok{(vars), }\DataTypeTok{rows =} \KeywordTok{vars}\NormalTok{(weekday), }\DataTypeTok{scales =} \StringTok{'free_y'}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}\DataTypeTok{axis.text.x =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{angle =} \DecValTok{45}\NormalTok{, }\DataTypeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Data_Days_ggplot_IntroForEDA_files/figure-latex/workingWCOVIDData-16.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Further resources -------------------------------------------------------}
+
+\CommentTok{# for more on visualizations in R, I always point people to the R graph gallery:}
+\CommentTok{# https://www.r-graph-gallery.com/}
+\CommentTok{# if you have an idea for a visualization, there is likely some code already in the}
+\CommentTok{# gallery that can get you started on making your final visualization. If you're stuck}
+\CommentTok{# I recommend checking it out.}
+\end{Highlighting}
+\end{Shaded}
+
+\end{document}

@@ -1,0 +1,219 @@
+---
+title: "Data Days Rmarkdown session"
+author: "Kees Schipper"
+date: "3/7/2021"
+output:
+  html_document:
+    df_print: paged
+    theme: spacelab
+    highlight: zenburn
+---
+# What is Rmarkdown?
+
+Rmarkdown is an way to integrate R data cleaning, modelling, analysis, and data visualizations into a well-formatted, easy to read output. Rmarkdown can handle multiple output formats such as pdf, word, and html documents, slideshows, or even web apps with Shiny. We'll go over some of the simple syntax first, and then we'll get into how to embed code into an Rmarkdown document
+
+---
+
+# Some basic syntax
+
+Starting off, you can easily just type text by...well...typing text. You can **bold** and *italicize* by surrounding text in double and single asterisks, respectively, or you can use _single underlines_ or __double underlines__ to italicize and bold. Notice how Rmarkdown colors your italicized text and bolded text the same, so that you can see what is doing what.
+
+Rmarkdown also makes it easy to apply headers by adding pound signs before your designated heading:
+
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+
+
+The heading you end up with depends on the number of pound signs you include before your text.
+
+---
+
+# Bulleted Lists:
+Bulleted lists are also easy to make in Rmarkdown! You can either make bullets by using the `+` symbol:
+
++ List element 1
++ List element 2
+  + List subelement 1
+    + List sub-sub-element 1
+      + List sub-sub-sub-element 1
++ List element 3
+
+Numbered lists are also easy:
+
+1. element 1
+2. element 2
+  + sub-element 1
+    + sub-sub-element 1
+      + sub-sub-sub-element 1
+3. element 3
+
+
+# Tables:
+
+I tend to stay away from manually making tables in markdown, because most of the tables I need are made by inline code, but if you wanted to make a table, the process is easy, if not a bit tedious...
+
+Table Header 1 | Table Header 2
+---------------|---------------
+Col1 val1      | Col2 val2
+Col1 val2      | Col2 val2   
+
+---
+
+# Sectioning of your document
+
+You can also add endashes `--` or emdashes `---` to you document to break up sections. I've included some emdashes above, so I'll break off this session with an endash. However endashes are kind of underwhelming if your goal is to section off your code
+
+--
+
+# Inline equations with LateX
+I often have problems with word's equation writing functionality. Markdown is not that much easier, and it requires you to understand LateX syntax, which is a whole beast in and of itself. But, to make inline equations, you simply surround your equation by two `$` signs. If you want scientific journal equation styles, you surround your text by two `$` signs on each side.
+
+$Area = \pi * r^2$
+$$Area = \pi * r^2$$
+I find this extremely helpful, because to get greek letters, all you have to do is type the phonetic spelling of the letter, surrounded in dollar signs, preceded by a backslash as follows (in lowercase):
+$\mu$
+$\beta$
+$\alpha$
+
+You can type out superscripts with the carat symbol `^`
+
+$x^2$
+
+If your exponent is more than one character long, surround the exponent in curly braces
+
+$x^{-1}$
+
+And *subscripts* are done simply by preceding the subscript with an underscore
+
+$\beta_0$
+
+All of this is extremely helpful if you need to include equations in your document. Like a regression equation (RMD also gives you helpful previews of your equations while you write)
+
+$$logit(y) = \alpha + \beta_0*x_1 + \beta_1*x_2 + \beta_2*x_3 + \beta_3*x_3^2$$
+if you want to number your equations
+\begin{equation}
+\tag{1}
+logit(y) = \alpha + \beta_0*x_1 + \beta_1*x_2 + \beta_2*x_3 + \beta_3*x_3^2
+\end{equation}
+
+
+*you can even include summands and integrals!*
+
+$\sum_{i = 1}^n$
+
+$\int_{i = a}^b$
+
+check out this link on overleaf for more on writing LaTeX equations:
+<a href = "https://www.overleaf.com/learn/latex/subscripts_and_superscripts">LaTeX help on overleaf.com</a>
+
+That's the end of the formatting section. There's a ton more functionality with formatting in markdown, but these were some of the points that I wanted to touch on briefly. With markdown, you can also embed html and css to style your text, but that goes beyond the scope of this session (plus I'm not an expert on html and I've never touched CSS, **but they're easy to learn!!!**)
+
+If you want to learn more HTML, CSS, Python, SQL, or Javascript, w3schools is an excellent resource! I use their site whenever I'm embedding html on a markdown document. <a href = "https://www.w3schools.com/html/html_links.asp">I even used their site when trying to figure out how to embed this link to their website on this document!!</a>
+
+# Rmarkdown with R code and visuals
+
+Rmarkdown wouldn't be nearly as useful if you couldn't embed R code into these documents! This functionality makes Rmarkdown an excellent tool for doing homework assignments, presenting your research and methods in a transparent way, and just making some really cool documents!
+
+At the beginning of every Rmarkdown document, we start with a `code chunk`, which is where we set the global settings for the document. Here we can put in settings as to whether we want our actual code to show up in our document, whether we want R to print code warnings and Errors into our documents, and even whether we want R to include or exclude certain output from our reports. The `opts_chunk$set` function lets us set global options for our 'code chunks'
+
+In our chunk, Include = FALSE is telling Rmd to not include this code chunk as part of our printout. echo = TRUE is telling R to always print out the output of whatever code we are running. I tend to turn warnings off with `warning = FALSE` because often times I only care about errors, but this is likely bad practice...Anyway! the setup chunk is also a good place to load your libraries
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, tidy = TRUE)
+
+library(tidyverse)
+library(broom)
+library(janitor)
+library(formatR)
+```
+
+Now that we've loaded in our packages, we can load in some data. To make a new code chunk in rmd, you can either use the insert button at the top, type out three ``` manually, or press ctrl+alt+i on windows. This might be cmd+option+i on mac, but I'm not sure
+
+```{r load data, include = TRUE}
+df <- economics
+head(df)
+```
+with `head()` we've printed out the first 6 rows of our dataset, which comes from the ggplot2 package data, **economics**. With code chunks, the last line of code that has output is printed. If you don't want any output to be printed, use `echo = FALSE` when setting options
+
+we can also look at some summary statistics
+
+```{r EDA I, include = TRUE}
+library(dlookr)
+describe(economics)
+```
+```{r EDA II}
+plot_normality(df)
+```
+```{r EDA III}
+correlate(df)
+```
+```{r EDA IV}
+psych::pairs.panels(df)
+```
+
+**Including our own graphs for analysis**
+```{r EDA V, message = F, fig.cap = "faceted visualizations of economics time series data from ggplot"}
+library(ggthemes)
+library(ggpubr)
+
+df %>%
+  mutate(date = as.Date(date)) %>%
+  pivot_longer(cols = c("pce", "pop", "psavert", "uempmed", "unemploy"),
+               names_to = "variable",
+               values_to = "values") %>%
+  ggplot(aes(x = date, y = values, color = values)) +
+  geom_smooth(color = "brown", alpha = 0.5, span = 0.2) +
+  geom_line(color = "skyblue", linetype = "dashed") +
+  facet_wrap(~variable, ncol = 2, scales = "free_y") +
+  labs(title = "Economics Dataset from ggplot")
+
+```
+and now you can easily place annotations with figures, and explain what you want your reader to get out of your work.
+
+In addition, if you're doing any sort of coding homework assignment, I find it much easier to have a code block that shows your code, prints an output, and allows you to annotate all-in-one, rather than to copy and paste things from R into a word document. For most homeworks I do that involve code, I'll do all of my work in an Rmd document, and "knit" the Rmd to a word document. Even if you can't get everything you need done in the Rmd document, you can always add to the word output afterwards!
+
+Oh also, if you still want to copy/paste graphs into your word documents, you can simply embed pictures into the code of an Rmd. It's not difficult I promise! Here's an example of the code
+
+![](C:\Users\keess\OneDrive\Pictures\Data_Visualizations\COVID-19_stacked_time_series.png)
+
+I'm not aware of the full details of embedding visuals, but your visual likely has to be in .png format
+
+You can also embed documents with the following html code:
+
+`<embed type = "image/jpg" src = "filename.jpg" width = "widthnum" height = "heightnum">`
+
+<embed type = "image/jpg" src = "C:\Users\keess\OneDrive\Pictures\Data_Visualizations\COVID-19-stacked-time-series.jpg" width = "400" height = "400">
+
+# Customizing your code chunk output
+
+Here, I'm just going to list some useful code chunk options that you can include in your chunks within curly braces at the beginning of said chunks.
+
+`message = FALSE` suppressed any messages that might come out of the output of your code
+
+`warning = FALSE` suppresses any warning messages that come out of your code
+
+`error = FALSE` will tell Rmd to not stop if it hits an error. I would only use this if you are intentionally trying to demonstrate an error in your script, and you want the error message to print out
+
+`tidy = TRUE` tidies up your output so that it looks nicer
+
+`eval = TRUE` whether to evaluate your code and show results
+
+`echo = TRUE` whether to display code along with results
+
+`fig.cap = "..."` adds a caption to any figures that you make in your document
+
+`cache = TRUE` if you have a piece of code that takes a long time to run, R will 'cache' that code and output, and skip the code on subsequent runs, as the output is already stored. This is extremely helpful if you're reading in your data for Rmd, or have a long series of operations that take forever to do.
+
+`results = asis` lets you develop content programmatically with R code. This is a more advanced setting, but can help if you want to print things out in a for loop
+
+`comment = ''` If you want comments to not have leading hashes in your text document. This may help clean up your output's look, but may confuse readers as to what is code and what is comment
+
+
+# Further Resources
+
+for more on markdown, check out the Rmarkdown book, <a href = "https://bookdown.org/yihui/rmarkdown-cookbook/number-lines.html#number-lines">which I believe was made using Rmarkdown</a>
+
+For resources on HTML and CSS design options, check out <a href = "https://www.w3schools.com/tags/default.asp"> W3schools html and CSS reference</a>.
