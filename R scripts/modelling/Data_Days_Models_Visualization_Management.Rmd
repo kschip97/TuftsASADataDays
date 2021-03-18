@@ -78,6 +78,8 @@ Let's create a basic model of life expectancy, predicted by GDP per capita, year
 mod1_df <- df %>%
   filter(continent == "Asia")
 
+# formula outcome ~ pred1 + pred2 + pred3
+
 mod1 <- lm(lifeExp ~ year + pop100k + gdp1000, data = mod1_df)
 # can summarise our model with the summary function
 summary(mod1)
@@ -109,7 +111,7 @@ car::crPlots(mod1)
 
 ## Improving our model
 
-Here we can see that `gdpPercap is not necessarily linear, and population might stray from linear as well. We might want to amend this in our model. However population by itself wasn't significant, so we'll remove that from our model
+Here we can see that `gdp1000` is not necessarily linear, and population might stray from linear as well. We might want to amend this in our model. However population by itself wasn't significant, so we'll remove that from our model
 
 ```{r Model2}
 mod2 <- lm(lifeExp ~ year + gdp1000 + I(gdp1000**2) + pop100k, data = mod1_df)
@@ -177,7 +179,7 @@ Back to the above visual...As you can see, above we have another test of our fit
 ```{r PanelPlots}
 mod1_df %>%
   dplyr::select(-continent, -country, -pop, -gdpPercap) %>%
-  psych::pairs.panels()
+  psych::pairs.panels(breaks = 40)
 ```
 
 ### `glance`
@@ -195,7 +197,7 @@ Sometimes we want to have our model in a neat output table, and we don't want to
 ### `tab_model`
 
 ```{r TabModel}
-
+# library(sjPlot)
 sjPlot::tab_model(mod1, mod2, mod3, show.intercept = FALSE, show.ci = 0.95, show.se = F, show.p = T,
                   show.r2 = TRUE, show.fstat = T, show.aic = T, show.obs = T, rm.terms = NULL, order.terms = NULL,
                   title = "Comparison of Gapminder Models")
@@ -223,7 +225,7 @@ So we've made a model for one continent...What if we wanted to make a model for 
 
 ### Nesting in purrr
 
-R has a package called purrr, which allows the user to nest data within a colum to make a new data set. purrr also implements a programmatic concept called mapping, which is simply applying a function to every element of a list. The combination of nesting a data frame into a column, and mapping a function onto that column will allow us to efficiently make many models (though the model specifications have to be the same across groups). Here's code on how to nest
+R has a package called purrr, which allows the user to nest data within a column to make a new data set. purrr also implements a programmatic concept called mapping, which is simply applying a function to every element of a list. The combination of nesting a data frame into a column, and mapping a function onto that column will allow us to efficiently make many models (though the model specifications have to be the same across groups). Here's code on how to nest
 
 ```{r nesting}
 nest_df <- df %>%
@@ -444,5 +446,5 @@ augment(pmod) %>%
 ```
 
 
-
+Note: This tutorial is very similar to the tutorial in R for data science by Hadley Wickham and Garret Grolemund in their "Many Models" chapter (Chapter 25). I do not take credit for the ideas presented here, as this tutorial is an adaptation of their tutorial, using similar data. For those looking for a more formal introduction to building many models, and the mechanics behind it, I'll leave a link to their book chapter <a href = "https://r4ds.had.co.nz/many-models.html">here</a>. 
 
