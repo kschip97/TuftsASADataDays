@@ -10,7 +10,7 @@ output:
 ---
 # What is Rmarkdown?
 
-Rmarkdown is an way to integrate R data cleaning, modelling, analysis, and data visualizations into a well-formatted, easy to read output. Rmarkdown can handle multiple output formats such as pdf, word, and html documents, slideshows, or even web apps with Shiny. We'll go over some of the simple syntax first, and then we'll get into how to embed code into an Rmarkdown document
+Rmarkdown is an way to integrate R data cleaning, modeling, analysis, and data visualizations into a well-formatted, easy to read output. Rmarkdown can handle multiple output formats such as pdf, word, and html documents, slideshows, or even web apps with Shiny. We'll go over some of the simple syntax first, and then we'll get into how to embed code into an Rmarkdown document
 
 ---
 
@@ -32,6 +32,7 @@ The heading you end up with depends on the number of pound signs you include bef
 ---
 
 # Bulleted Lists:
+
 Bulleted lists are also easy to make in Rmarkdown! You can either make bullets by using the `+` symbol:
 
 + List element 1
@@ -144,12 +145,15 @@ we can also look at some summary statistics
 library(dlookr)
 describe(economics)
 ```
+
 ```{r EDA II}
 plot_normality(df)
 ```
+
 ```{r EDA III}
 correlate(df)
 ```
+
 ```{r EDA IV}
 psych::pairs.panels(df)
 ```

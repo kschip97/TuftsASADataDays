@@ -1,0 +1,371 @@
+---
+title: "Data Days Model Building, Visualization, and Management"
+author: "Kees Schipper"
+date: "3/15/2021"
+output: 
+  html_document:
+    toc: True
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gapminder)
+library(sjPlot)
+library(broom)
+```
+
+```{css, echo=FALSE}
+pre, code {white-space:pre !important; overflow-x:auto}
+```
+
+```{r GetData}
+df <- gapminder
+head(gapminder)
+```
+```{r SummaryData}
+summary(gapminder)
+```
+
+```{r}
+unique(gapminder$country) #lot of countries, let's visualize
+```
+
+```{r VizCountries}
+
+gapminder %>%
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line(aes(color = continent, group = country)) +
+  labs(title = "Gapminder Life Expectancy By Year")
+
+```
+```{r SplitViz}
+
+gapminder %>%
+  ggplot(aes(x = year, y = lifeExp)) +
+  geom_line(aes(color = continent, group = country)) +
+  facet_wrap(~continent) +
+  labs(title = "Gapminder Life Expectancy By Year")
+
+```
+
+# Basic Modelling
+
+```{r}
+names(df)
+```
+
+
+Let's create a basic model of life expectancy, predicted by GDP per capita, year, and population. But let's start with just Asia
+
+```{r}
+# keep only countries within the continent of Asia
+mod1_df <- gapminder %>%
+  filter(continent == "Asia")
+
+mod1 <- lm(lifeExp ~ year + pop + gdpPercap, data = mod1_df)
+# can summarise our model with the summary function
+summary(mod1)
+
+```
+
+We see that year and gdpPercap is significant. We should also check for normality of residuals, heteroscedasticity, etc... Which we can do by just calling the plot function on our model
+
+```{r}
+par(mfrow = c(2, 2))
+plot(mod1)
+
+```
+
+qq looks somewhat normal, residuals vs fitted look all right, not a lot of leverage points... alright we're not being too picky here.
+
+---
+
+We can also look at component plus residual plots of our data to check linearity of our predictors with respect to the outcome (this is only useful for a multivariate linear model)
+
+```{r CRplots}
+library(car)
+car::crPlots(mod1)
+
+```
+
+Here we can see that `gdpPercap is not necessarily linear, and population might stray from linear as well. We might want to amend this in our model. However population by itself wasn't significant, so we'll remove that from our model
+
+```{r Model2}
+mod2 <- lm(lifeExp ~ year + gdpPercap + I(gdpPercap**2) + pop, data = mod1_df)
+# the I() tells the model to treat the gdpPercap term 'as is,' and not to adjust it or ignore it
+summary(mod2)
+```
+
+```{r CheckModFit}
+# let's check our model's fit from the first model. The below code
+# performs an F-test
+anova(mod1, mod2)
+```
+
+
+### The broom package
+
+The summary function is great, but it's hard to work with the output of it directly. To do this, a package was developed called `broom` which allows you to fortify your data with fitted values, create a data frame with your model output, and get goodness of fit statistics
+
+broom has 3+ very useful functions called `tidy`, `augment`, and `glance`. `tidy` returns the same data as your summary table (and more) in the form of a data frame. You can also ask for confidence intervals, p values, and exponentiation, among other things, depending on the model you've fit
+
+```{r tidy}
+tidy(mod2, conf.int = T, statistic = F, std.error = T, p.value = T)
+```
+Augment returns a data frame of fitted values for your data, which you can then use to fit your trend line over your data. However, because we have a multivariable model, a trend line doesn't necessarily make sense. I'll make a univariate model so this will make more sense
+
+```{r augment}
+
+mod3 <- lm(lifeExp ~ year, data = mod1_df)
+augdata <- augment(mod3, interval = "prediction")
+
+augdata %>%
+  ggplot(aes(x = year)) +
+  geom_point(aes(y = lifeExp)) +
+  geom_line(aes(y = .fitted), col = 'red') +
+  geom_line(aes(y = .upper), col = 'blue') +
+  geom_line(aes(y = .lower), col = 'blue') +
+  geom_smooth(aes(y = lifeExp), se = F, color = 'green') +
+  labs(title = "LM of LifeExpectancy vs. Year")
+
+```
+
+As you can see, above we have another test of our fit. We have out fitted line in red, prediction intervals, which we got rom the augmented data frame in blue, and a lowess smoother in green, showing slight deviations from linearity about our model. In all honesty **you should probably plot a lowess smoother over your data before you make a linear model to check if the relationship is linear**. A shortcut for doing that is the below code `pairs.panels()` from the psych package, which plots a scatterplot and correlation matrix of all of the variables in your data frame
+
+```{r PanelPlots}
+mod1_df %>%
+  select(-continent, -country) %>%
+  psych::pairs.panels()
+```
+
+Finally, we have glance, which gives us goodness of fit statistics for our models
+```{r glance, style = "max-width: 1000 px;"}
+knitr::kable(glance(mod1))
+knitr::kable(glance(mod2))
+```
+
+## Comparing models side-by-side
+
+Sometimes we want to have our model in a neat output table, and we don't want to format the table every time we change our model. We can programmatically make model tables with the `tab_model` function in sjPlot
+
+```{r TabModel}
+
+sjPlot::tab_model(mod1, mod2, mod3, show.intercept = FALSE, show.ci = 0.95, show.se = F, show.p = T,
+                  show.r2 = TRUE, show.fstat = T, show.aic = T, show.obs = T, rm.terms = NULL, order.terms = NULL,
+                  title = "Comparison of Gapminder Models")
+
+```
+
+Now we can compare models programmatically without having to export the models into an Excel table every time we run our code! This function works with most of R's built-in modelling functions. There's another variant called `plot_model` which will plot estimates of our models together
+
+```{r PlotModel}
+
+sjPlot::plot_models(mod1, mod2, mod3, show.values = T, colors = "Dark2", ci.lvl = 0.99, axis.lim = c(-0.5, 0.5),
+                    dot.size = 2, show.p = TRUE)
+
+```
+obviously, this plot is a little underwhelming because we have a very simple model, and out predictors don't show great amounts of spread from zero, but you could see how this type of plot could be useful for logistic, poisson, negative binomial, or other types of regressions with much wider confidence intervals.
+
+---
+
+# Many Many Many Models
+
+So we've made a model for one continent...What if we wanted to make a model for all of the continents in our data set? Should we go through that same workflow for every one? There is a faster way, but it's somewhat tricky, so I'll present it here and leave it up to your discretion. Often times if you code by brute force method, it can take longer to do, and be many more lines, but the code may be more understandable in the end. I'll show the programmatic way of making many models though.
+
+R has a package called purrr, which allows the user to nest data within a colum to make a new data set. purrr also implements a programmatic concept called mapping, which is simply applying a function to every element of a list. The combination of nesting a data frame into a column, and mapping a function onto that column will allow us to efficiently make many models (though the model specifications have to be the same across groups). Here's code on how to nest
+
+```{r nesting}
+nest_df <- gapminder %>%
+  group_by(continent) %>%
+  nest()
+
+head(nest_df)
+```
+
+It's as easy as that! First you group by the category that you want to model across. In this case we want to apply similar models across continents. Now we have to make a function for a model which we can apply across the nested data frames. First I'll show you what's contained in the data column
+
+```{r InTheNest}
+head(nest_df$data[[1]])
+tail(nest_df$data[[1]])
+
+```
+
+The first row of the data column is just a data frame containg data for all countries in Africa. Here we have year, lifeExp, pop, and gdpPercap. Now we need to make a function which we can apply across these tibbles, which take the same variable names (for sake of ease)
+
+```{r mapfunc}
+cont_mod <- function(df){
+  mod1 <- lm(lifeExp ~ year + gdpPercap + I(gdpPercap**2), data = df)
+  return(mod1)
+}
+```
+
+
+Now that we have our model function, we can map the model onto our nested data frame and make a new variable called `model`
+
+```{r mapmodel}
+nest_df_mod <- nest_df %>%
+  mutate(model = map(data, cont_mod))
+
+```
+
+We've mapped our model. Let's see what one of the models looks like
+
+```{r revealmod}
+summary(nest_df_mod$model[[1]])
+```
+
+Here we have a model of all of the African countries predicting life expectancy. We can continue using map to get a tidy model output, augment our output, or look at fit statistics with glance
+
+```{r TidyAugGlance}
+nest_df_fortify <- nest_df_mod %>%
+  mutate(tdy = map(model, tidy, conf.int = T),
+         aug = map(model, augment),
+         glnc = map(model, glance))
+
+head(nest_df_fortify)
+```
+
+You might be thinking "This is great! But how the hell do we work with this now?" That tripped me up for a while too, but the easiest thing for us to do is something called `unnest`. It takes a nested column, and expands it back to original tibble size. I'll demonstrate.
+
+```{r UnnestTidy}
+
+df_tidy <- nest_df_fortify %>%
+  select(continent, tdy) %>%
+  unnest(tdy)
+
+print(df_tidy)
+
+
+```
+
+Voila! Now we have a data frame of continents with model parameters including standard errors, p values, confidence intervals, etc... This may not be useful for 5 categories, but imagine if you're making models for 100 categories! Also, purrr implements this type of stuff extremely efficiently, so running models with map is much faster than running 100 different models individually. For demonstration's sake, I'll just show the output of the augment and glance unnests
+
+
+```{r UnnestGlance}
+
+df_glance <- nest_df_fortify %>%
+  select(continent, glnc) %>%
+  unnest(glnc)
+
+print(df_glance)
+
+```
+
+Now we can easily compare fit statistics across countries. We can see that our $R^2$ value for Africa is much lower than the other continents, suggesting that our model did not fit that country well. Perhaps this requires some tuning in the future.
+
+
+---
+
+# Other Basic Regression Types: glm and glm.nb
+
+R, being a statistical language, has many other types of models that you can implement, most of which can be accessed using the glm function. Let's load in some data that might allow us to use some different distributions
+
+This is just data cleaning and retrieval, so we aren't going to cover this in depth
+
+```{r LoadCOVID}
+
+rm(list = ls())
+
+cases_global <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv") %>%
+  dplyr::select(-Lat, -Long) %>%
+  pivot_longer(cols = c(everything(), -`Province/State`, -`Country/Region`),
+               names_to = "date",
+               values_to = "cases") %>%
+  mutate(date = as.Date(date, format = '%m/%d/%y'))
+
+deaths_global <- read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv") %>%
+  dplyr::select(-Lat, -Long) %>%
+  pivot_longer(cols = c(everything(), -`Province/State`, -`Country/Region`),
+               names_to = "date",
+               values_to = "deaths") %>%
+  mutate(date = as.Date(date, format = '%m/%d/%y'))
+
+COVID_master <- cases_global %>%
+  left_join(deaths_global, by = c('Province/State', 'Country/Region', 'date')) %>%
+  rename(country = 'Country/Region',
+         state = 'Province/State') %>%
+  group_by(country, date) %>%
+  summarise(cases = sum(cases, na.rm = T),
+            deaths = sum(deaths, na.rm = T)) %>%
+  mutate(daily_cases = ave(cases, country, FUN = function(x) c(0, diff(x))),
+         daily_deaths = ave(deaths, country, FUN = function(x) c(0, diff(x))),
+         daily_cases_s = ave(daily_cases, country, FUN = function(x) kza::kz(x, m = 14, k = 2)),
+         daily_deaths_s = ave(daily_deaths, country, FUN = function(x) kza::kz(x, m = 14, k = 2)))
+
+COVID_master %>%
+  ggplot(aes(x = date, y = daily_cases_s, group = country, color = country)) +
+  geom_line(alpha = 0.25) +
+  theme(legend.position = 'none')
+
+COVID_master %>%
+  ggplot(aes(x = date, y = daily_deaths_s, group = country, color = country)) +
+  geom_line(alpha = 0.25) +
+  theme(legend.position = 'none')
+```
+
+Let's look at the Netherlands!
+
+```{r Netherlands}
+
+COVID_Ned <- COVID_master %>%
+  filter(country == "Netherlands")
+
+COVID_Ned %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = daily_cases_s + 1), color = 'blue') +
+  geom_line(aes(y = daily_deaths_s + 1), color = 'firebrick3')
+
+COVID_Ned %>%
+  pivot_longer(cols = c('daily_cases', 'daily_deaths'),
+               names_to = 'outcomes',
+               values_to = 'values') %>%
+  ggplot() +
+  geom_histogram(aes(x = values)) +
+  facet_wrap(~outcomes)
+
+mean(COVID_Ned$daily_cases)
+var(COVID_Ned$daily_cases)
+mean(COVID_Ned$daily_deaths)
+var(COVID_Ned$daily_deaths)
+```
+
+Here we see that the mean value of cases and deaths is much less than the variance. In addition, both data are highly skewed. We could either use a transformation to normalize these data, or use a glm distribution that accomodates these factors, such as poisson or negative binomial distributions. We can do this using the `glm()` function. Let's model how COVID rates change by the weekday
+
+```{r WeekdayPoisson}
+COVID_Ned_wk <- COVID_Ned %>%
+  mutate(DoW = weekdays(date))
+
+pmod <- glm(daily_cases ~ date + DoW + daily_cases_s, family = 'poisson', data = COVID_Ned_wk)
+summary(pmod)
+```
+
+We have model output, but it's difficult to interpret poisson regression coefficients without exponentiating them. Let's bring tidy back into the mix
+
+```{r tidypoiss}
+tidy(pmod, conf.int = TRUE, exponentiate = T)
+
+```
+
+```{r}
+augment(pmod) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = exp(.fitted)), color = 'red') +
+  geom_point(aes(y = daily_cases))
+```
+
+```{r, warning = FALSE}
+library(MASS)
+
+nbmod <- glm.nb(daily_cases ~ date + DoW + daily_cases_s, data = COVID_Ned_wk)
+summary(nbmod)
+```
+
+```{r}
+augment(nbmod) %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = exp(.fitted)), color = 'red') +
+  geom_point(aes(y = daily_cases))
+```
+
