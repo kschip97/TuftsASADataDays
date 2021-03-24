@@ -427,7 +427,7 @@ Here we see that the mean value of cases and deaths is much less than the varian
 COVID_Ned_wk <- COVID_Ned %>%
   mutate(DoW = weekdays(date))
 
-pmod <- glm(daily_cases ~ date +DoW + daily_cases_s, family = 'poisson', data = COVID_Ned_wk)
+pmod <- glm(daily_cases ~ date +DoW + daily_cases_s + I(daily_cases_s**2), family = 'poisson', data = COVID_Ned_wk)
 summary(pmod)
 ```
 
@@ -441,9 +441,75 @@ tidy(pmod, conf.int = TRUE, exponentiate = T)
 ```{r}
 augment(pmod) %>%
   ggplot(aes(x = date)) +
-  geom_line(aes(y = exp(.fitted)), color = 'red') +
-  geom_point(aes(y = daily_cases))
+  geom_point(aes(y = daily_cases)) +
+  geom_line(aes(y = exp(.fitted)), color = 'red')
 ```
+
+### Negative Binomial glm
+
+Negative binomial regression models are generalizations of poisson-distributed models, where an added parameter for overdispertion is included in the model. In a poisson-distribution, the variance is considered to be equal to the mean of the distribution. This is therefore a model assumption of a poisson model of counts. Sometimes, however, our data does not fit this frame of variance being equal to the mean. In this case, we must estimate the overdispersion with a dispersion parameter, which is accounted for with the `glm.nb` function from the MASS package. First, let's calculate the mean and variation of the distribution of cases in our dataset
+```{r VMratio}
+m <- mean(COVID_Ned_wk$daily_cases)
+v <- var(COVID_Ned_wk$daily_cases)
+
+print(paste0("The mean value of daily_cases is ", m))
+print(paste0("The variance of daily_cases is ", v))
+print(paste0("The ratio of variance:mean is ", v/m))
+
+
+
+```
+
+Here we can see that the variance is much larger than the mean of daily cases. We can get more specific and look at the ratio of mean to variance on a monthly basis, which might make more sense than looking at the entire time series together
+
+```{r OvDispMonths}
+COVID_Ned_wk %>%
+  mutate(month = months(date)) %>%
+  group_by(month) %>%
+  summarise(mean = mean(daily_cases, na.rm = T),
+            var = var(daily_cases, na.rm = T),
+            VMratio = var/mean)
+```
+
+Above we can see that throughout all months,  the ratio of variance to mean is extremely high, showing that overdispersion is characteristic of the entire time series, not just one or two segments. Therefore it would make sense to apply a negative binomial generalized linear model (which is extremely easy to do)
+
+```{r}
+library(MASS)
+NBmod <- glm.nb(daily_cases ~ date +DoW + daily_cases_s + I(daily_cases_s**2), data = COVID_Ned_wk)
+tdyNBmod <- tidy(NBmod, conf.int = T, exponentiate = T)
+augNBmod <- augment(NBmod)
+gln <- glance(NBmod)
+```
+
+```{r}
+
+plot(x = augNBmod$date, y = augNBmod$daily_cases)
+lines(x = augNBmod$date, y = exp(augNBmod$.fitted), col = 'red', lwd = 2)
+lines(x = augNBmod$date, y = confint)
+
+```
+
+our model fit isn't half bad... Even so, there are portions of the model that don't seem to fit quite right, and it would be interesting to see the biases in our model fit, and if there are areas that can be improved. Unfortunately, support for glm.nb models isn't as fully developed as for linear models, so we have to do some of the grunt work ourselves. The .resid component of the augment output for glm.nb models is somewhat unusable, so we can make our own residuals by taking the difference between our original data and the exponent of our fitted values.
+
+```{r}
+augNBmod_fit <- augNBmod %>%
+  mutate(.resid = daily_cases - exp(.fitted))
+
+augNBmod_fit %>%
+  ggplot(aes(x = date, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0)
+  
+```
+
+As we can see, it looks like the residuals are still heavily autocorrelated. R has some cool functions for time series that lets you see the extent of this correlation. One is called `acf()` which just calculates an autocorrelation function. Here we can calculate both the autocorrelation of our residuals and the autocorrelation of our original plot
+
+```{r}
+acf(augNBmod_fit$.resid, lag.max = 40)
+acf(augNBmod_fit$daily_cases, lag.max = 40)
+```
+
+We see above that there is obvious autocorrelation in our residuals in addition to our original plot, as we would expect with a time series This somewhat throws a wrench in our analysis...
 
 
 Note: This tutorial is very similar to the tutorial in R for data science by Hadley Wickham and Garret Grolemund in their "Many Models" chapter (Chapter 25). I do not take credit for the ideas presented here, as this tutorial is an adaptation of their tutorial, using similar data. For those looking for a more formal introduction to building many models, and the mechanics behind it, I'll leave a link to their book chapter <a href = "https://r4ds.had.co.nz/many-models.html">here</a>. 
