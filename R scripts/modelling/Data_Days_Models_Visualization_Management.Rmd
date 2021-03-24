@@ -481,6 +481,8 @@ augNBmod <- augment(NBmod)
 gln <- glance(NBmod)
 ```
 
+below, we can plot the fitted values of our model to the data. As you can see, the fit looks exactly the same as the poisson model, but the standard errors and confidence intervals should be different.
+
 ```{r}
 
 plot(x = augNBmod$date, y = augNBmod$daily_cases)
@@ -510,6 +512,27 @@ acf(augNBmod_fit$daily_cases, lag.max = 40)
 ```
 
 We see above that there is obvious autocorrelation in our residuals in addition to our original plot, as we would expect with a time series This somewhat throws a wrench in our analysis...
+
+
+## Logistic regressions
+
+Logistic regressions are implemented very simply with the `glm()` function, specifying the argument `family = 'binomial'`. I'll adapt the gapminder dataset below to demonstrate
+
+```{r}
+df <- gapminder %>%
+  mutate(lifeExpOv75 = ifelse(lifeExp > 75, 1, 0))
+
+# now we can use lifeExpOv75 as our logistic regression outcome variable
+logmod <- glm(lifeExpOv75 ~ year + I(gdpPercap/1000) + continent, family = 'binomial', data = df)
+
+tidy(logmod, exponentiate = T, conf.int = T) %>%
+  mutate(across(where(is.numeric), round, 2))
+
+```
+
+here we see in our tidy output that every year increase is significantly associated with 1.14 times the odds of having a life expectancy over 75. Every $1000 increase in gdpPercap is associated with 1.15 times the odds of having a life expectancy over 75. In addition, we can see that Africa is not shown in the model output. This is because Africa serves as the reference country in our model. If we wanted to change that, we would have to relevel the continent factor. We can see that though our confidence intervals are extremely wide, they are still statistically significant. However, if we chose a different reference level, we may be able to have more interprable confidence intervals. 
+
+One final thing, we want to mention that intercepts are not interprable in this model, as the intercepts represent life expectancy at year 0, where gdpPercapita is 0, and the continent is Africa. If we wanted interprable intercepts, we would have to mean-standardize all of our variables in our model.
 
 
 Note: This tutorial is very similar to the tutorial in R for data science by Hadley Wickham and Garret Grolemund in their "Many Models" chapter (Chapter 25). I do not take credit for the ideas presented here, as this tutorial is an adaptation of their tutorial, using similar data. For those looking for a more formal introduction to building many models, and the mechanics behind it, I'll leave a link to their book chapter <a href = "https://r4ds.had.co.nz/many-models.html">here</a>. 
