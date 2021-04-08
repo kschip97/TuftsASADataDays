@@ -2,7 +2,9 @@
 title: "An Introduction to R"
 author: "Kees Schipper"
 date: "3/25/2021"
-output: html_document
+output: 
+  html_document:
+    toc: True
 ---
 
 ```{r setup, include=FALSE}
@@ -49,14 +51,6 @@ print(x)
 ```
 
 However, variables can store much more than single numbers. Variables can store just about anything in R. Variables can store things like formulas: `outcome ~ pred1 + pred2 + pred3` used for making models. You can also store strings, lists, factors, data frames, vectors, plots and complicated visuals. Almost anything you can imagine in R can be stored as a variable.
-
-```{r}
-x <- seq(1, 100, 0.25)
-y <- sin(x)
-
-plt <- plot(x, y, type = "l", main = "sin plot")
-print(plt)
-```
 
 
 # Data types
@@ -108,6 +102,7 @@ We can easily index elements with square brackets placed after the variable that
 
 ```{r}
 vec1 <- seq(500, 1, by = -15)
+print(vec1)
 vec1[1] # the first element
 vec1[length(vec1)] # the last element
 ```
@@ -120,13 +115,13 @@ vec1[5:25]
 # or we can grab every other index
 vec1[seq(5, 25, by = 2)]
 
-# or we can remove a number by its index
+# or we can remove an element by its index
 vec3 <- vec1[-c(15, 25, 30)]
 vec1
 vec3
 ```
 
-We can also index using boolean values (TRUE/FALSE). How booleans work is that you provide a boolean comparison or operation such as greater than `>`, less than `<`, greater than or equal to `>=`, less than or equal to `<=`, equal to `==`, **not** equal to `!=`, is missing (or NA) `is.na()`, is **not** missing (or NA) `!is.na()`, that compares two pieces of data based on a certain condition. Notice that the exclamation point (called a "bang" in R terminology), simply negates whatever operation follows it (this can be extremely useful in letting the user define their own operations). I'll include some simple booleans below
+We can also index using boolean values (TRUE/FALSE). How booleans work is that you provide a comparison or operation such as greater than `>`, less than `<`, greater than or equal to `>=`, less than or equal to `<=`, equal to `==`, **not** equal to `!=`, is missing (or NA) `is.na()`, is **not** missing (or NA) `!is.na()`, etc... that compares two pieces of data based on a certain condition. Notice that the exclamation point (called a "bang" in R terminology), simply negates whatever operation follows it (this can be extremely useful in letting the user define their own operations). I'll include some simple booleans below
 
 ```{r}
 x <- NA
@@ -153,7 +148,7 @@ vec1 < 250
 vec1
 ```
 
-Now, if we use `vec1 < 250` as an indexer, we'll get a vector returned that should only hve the values of 245 to 5
+Now, if we use `vec1 < 250` as an indexer, we'll get a vector returned that should only have the values of 245 to 5
 
 ```{r}
 vec1[vec1 < 250]
@@ -193,11 +188,11 @@ mylist_named <- list(bool = FALSE, hund = 100, formula = outcome ~ first + secon
 
 ### Indexing lists
 
-Indexing lists is a little bit different than with simple vectors or data frames, which we will cover next. You can pull elements from lists using a double bracket operator `[[]]`. This double bracket explicitly takes a single object from a list and returns it to you. You can either use the numerical index, or position of the object you want, or you can use the explicit name that the object is given in the list. I'll show you two ways of getting the same thing
+Indexing lists is a little bit different than with simple vectors or data frames, which we will cover next. You can pull elements from lists using a double bracket operator `[[]]`. This double bracket explicitly takes a single object from a list and returns it to you. You can either use the numerical index of the object you want, or you can use the explicit name that the object is given in the list. I'll show you two ways of getting the same thing
 
 ```{r}
-mylist_named[[1]]
-mylist_named[["bool"]]
+mylist_named[[2]]
+mylist_named[["hund"]]
 ```
 
 In this way, you can access elements of your list either using a numerical index, or the key that is provided for that list. There is also one more way to extract elements from a list, and that is with the convenient `$` operator. This operator also lets you use autocomplete if you aren't sure of the name of the thing that you want in your list
@@ -216,7 +211,7 @@ mylist_named$formula
 
 ## Data frames
 
-Data frames can be simply conceptualized as the equivalent of an excel spreadsheet in R. If you want a more complex explanation, Data frames are a list of vectors, where each vector has a name (this has implications for indexing data frames later). Let's stick with the first explanation for now, as it's less confusing and most people have worked with excel before. Creating data frames are simple, but often you will get a data frame from a .csv file or off of the internet rather than making them yourself
+Data frames can be conceptualized as the equivalent of an excel spreadsheet in R. If you want a more complex explanation, Data frames are a list of column vectors, where each vector has a name (this has implications for indexing data frames later). Let's stick with the first explanation for now, as it's less confusing and most people have worked with excel before. Creating data frames are simple, but often you will get a data frame from a .csv file or off of the internet rather than making them yourself
 
 ```{r}
 
@@ -229,7 +224,7 @@ random_data
 
 ```
 
-If we consider each column of the data frame to be a single vector that is part of a 'list', then we can index columns the same way that we would index elements of a list:
+If we consider each column of the data frame to be a single vector that is part of a 'list', then we can index columns the same way that we would index elements of a list, except that now, we can also index data frames using single brackets, with `[row, column]` specification. Note: if you want to extract all rows from a single column, or all columns from a single row, leave the respective row or column element blank.
 
 ```{r}
 random_data$bools
@@ -255,7 +250,7 @@ random_data
 random_data$letters[2]
 
 random_data[["numbers"]][3]
-# intuitively, here we are selecting a vector, numbers, and then getting the third element from it
+# intuitively, here we are selecting a vector, called numbers, and then getting the third element from it
 
 # or we could keep both column and row indexes in the same index
 random_data[2, 3]
@@ -613,6 +608,13 @@ setwd()
 ```{r}
 # TODO: Edit dplyr section to read like the sections preceding, with explanations and examples.
 # Introduction to dplyr functions -----------------------------------------
+# load in the data
+library(tidytuesdayR)
+Kenya_All <- tt_load(2021, week = 4)
+Kenya_All
+
+House <- Kenya_All$households
+
 
 # ?magrittr::`%>%`
 # ?dplyr::select
@@ -967,8 +969,8 @@ df %>%
   geom_violin() +
   facet_wrap(~clarity)
 
-?geom_hline
-?geom_vline
+# ?geom_hline
+# ?geom_vline
 
 # for all of the geoms, you can type geom_<TAB> and scroll through the autocomplete
 # to see what is available
