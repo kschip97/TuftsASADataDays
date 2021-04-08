@@ -31,8 +31,8 @@ setwd("C:/Users/keess/Box/ASA Share/ASA 2020/ASA Meetings/Data Days Spring 2021/
 library(tidyverse)
 
 # The Diamonds dataset ---------------------------------
-
-df <- diamonds
+set.seed(123)
+df <- slice_sample(diamonds, n = 5000, replace = TRUE)
 names(df)
 
 # simple scatterplots of diamond price by carat

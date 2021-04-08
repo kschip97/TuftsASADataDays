@@ -6,7 +6,7 @@ output:
   html_document:
     toc: True
     toc_float: True
-    toc_depth: 3
+    toc_depth: 4
     highlight: zenburn
 ---
 
@@ -427,7 +427,7 @@ Here we see that the mean value of cases and deaths is much less than the varian
 COVID_Ned_wk <- COVID_Ned %>%
   mutate(DoW = weekdays(date))
 
-pmod <- glm(daily_cases ~ date +DoW + daily_cases_s + I(daily_cases_s**2), family = 'poisson', data = COVID_Ned_wk)
+pmod <- glm(daily_cases ~ date + DoW + daily_cases_s + I(daily_cases_s**2), family = 'poisson', data = COVID_Ned_wk)
 summary(pmod)
 ```
 
@@ -484,10 +484,8 @@ gln <- glance(NBmod)
 below, we can plot the fitted values of our model to the data. As you can see, the fit looks exactly the same as the poisson model, but the standard errors and confidence intervals should be different.
 
 ```{r}
-
 plot(x = augNBmod$date, y = augNBmod$daily_cases)
 lines(x = augNBmod$date, y = exp(augNBmod$.fitted), col = 'red', lwd = 2)
-lines(x = augNBmod$date, y = confint)
 
 ```
 
@@ -526,7 +524,7 @@ df <- gapminder %>%
 logmod <- glm(lifeExpOv75 ~ year + I(gdpPercap/1000) + continent, family = 'binomial', data = df)
 
 tidy(logmod, exponentiate = T, conf.int = T) %>%
-  mutate(across(where(is.numeric), round, 2))
+  mutate(across(where(is.numeric), round, digits = 2))
 
 ```
 
