@@ -5,14 +5,15 @@ date: "3/25/2021"
 output: 
   html_document:
     toc: True
+    highlight: zenburn
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 rm(list = ls())
-library(tidyverse)
-library(todor)
-todor()
+if (!require(tidyverse)) install.packages('tidyverse');library(tidyverse)
+if (!require(todor)) install.packages("todor");library(todor)
+# todor()
 ```
 
 # 0.0-Introduction:
@@ -297,7 +298,7 @@ The general format of a function is `funcName(arg1, arg2, arg3...)`. Arguments a
 
 There are too many built-in functions to use in R for me to go over, so I'll just list a couple helpful base functions that I find helpful in looking at data. I recommend looking at the documentation of some of these functions to get an idea of how they work, and maybe you could implement some of them into your scripts
 
-```{r}
+```{r echo = FALSE, results = 'hide', message = FALSE, warning = FALSE}
 # for basic summary statistics
 mean
 min
@@ -308,14 +309,15 @@ var
 quantile
 summary
 
-# for working with strings
+# for working with and combining strings
 paste
 paste0
 substr
+cat
 
-# pattern matching
-grep
-grepl
+# pattern matching of strings
+grep # returns a vector of indices or of elements in x that yields a match
+grepl # returns a TRUE or FALSE if there is a pattern match
 
 # finding the index of something
 which
@@ -336,6 +338,33 @@ list
 vector
 matrix
 c
+
+# The apply family: Applying functions across lists or data frames
+lapply
+vapply
+sapply
+apply
+
+# for setting up your random number generators--reproducible randomness
+set.seed
+
+# random number generators for various distributions
+runif
+rbinom
+rbeta
+rcauchy
+rchisq
+rnorm
+rgamma
+rgeom
+rlnorm
+rpois
+rstudent
+rt
+
+# get the current date and/or time
+Sys.Date
+Sys.time
 
 # and if you ever want to explore what a function does, type the name of the function in the console, and press enter after it. This will pull up the code contained in the function. Reading source code is a bit of an advanced topic, but it's a good way to see how others write their functions, and can give you an idea of what's happening under the hood
 ```
@@ -381,7 +410,7 @@ Some details:
 
 ### Control flow (AKA if...else if...else)
 
-You can use what is called "control flow" to have your script make analysis decisions for you! This is an extremely powerful capability that's available in every programming language you ever see, so once you learn how to use if-else ======= in R, you can use this concept in any other programming language.
+You can use what is called "control flow" to have your script make analysis decisions for you! This is an extremely powerful capability that's available in every programming language you ever see, so once you learn how to use if-else statements in R, you can use this concept in any other programming language.
 
 If-else statements work as follows:
 
@@ -397,7 +426,7 @@ If-else statements work as follows:
 `if...else` statements are great to include in functions to give your users multiple options for how to evaluate a chunk of code. Let's adjust our greeting function so that it greets you based on the time of day you provide.
 
 ```{r}
-library(lubridate)
+if (!require(lubridate)) install.packages('lubridate');library(lubridate)
 
 SayHiTOD <- function(name){
   hour <- hour(as.character(Sys.time())) 
@@ -588,9 +617,12 @@ library(tidyverse)
 ## Set your working directory
 setwd()
 
+# one more snippet I made that (1) checks if a package is in your library; (2) if the package is
+# not in your library, it installs the package, and (3) activates the package in your lib
+if (!require()) install.packages();library() # checkpkg
 
-
-
+# This code is easy to find on the internet and is great if you're sharing code with
+# others and they may or may not have some packages needed to run your scripts
 ```
 
 # Base Plotting
@@ -605,16 +637,19 @@ setwd()
 
 ## dplyr
 
-```{r}
+dplyr is probably one of the most used R packages because of its ease of use in wrangling data. If you aren't already using dplyr to do your data cleaning and management, I would highly recommend learning it. It's much easier and intuitive than using base R to clean large data sets.
+
+In addition, dplyr functions act as *verbs*, showing that you are *doing* something to the data that you are working with. For example, you are either using `select` to select columns, `filter` to filter rows, `mutate` to create new variables, `arrange` to arrange your data by some order, `group_by` to group your analysis by a certain categorical variable, `summarize` to summarize your data into easy-to-digest summary tables, or `rename` to rename variables in your data set. We'll go through how to use each function below, but first, we need some data, which we can get from the tidytuesdayR package.
+
+```{r echo = FALSE}
 # TODO: Edit dplyr section to read like the sections preceding, with explanations and examples.
-# Introduction to dplyr functions -----------------------------------------
+
 # load in the data
-library(tidytuesdayR)
+if (!require(tidytuesdayR)) install.packages("tidytuesdayR");library(tidytuesdayR)
 Kenya_All <- tt_load(2021, week = 4)
 Kenya_All
 
 House <- Kenya_All$households
-
 
 # ?magrittr::`%>%`
 # ?dplyr::select
@@ -626,8 +661,11 @@ House <- Kenya_All$households
 # ?dplyr::rename
 ```
 
+Before we start with dplyr functions (which I'll refer to interchangably as functions or verbs), we should know how to use what is called the "pipe" operator, of `%>%`. This operator allows us to connect multiple dplyr verbs together to have a streamlined process of data cleaning all done in one run of our code. This reduces the number of lines we have to write, and creates an easy to read list of verbs, showing what exactly we are doing to our data.
 
-```{r}
+`%>%` is a function in and of itself, what it does is it takes what is on its left side, and passes it to the first argument of a function that appears on its right side, or on the next line of code. An example is shown below:
+
+```{r intropipe}
 # %>% or the pipe operator ------------------------------------------------
 # f(x) is the same thing as x %>% f()
 
@@ -636,39 +674,86 @@ sum(x)
 x %>% sum()
 ```
 
+as we can see, `x %>% sum()` is equivalent to `sum(x)`, because the pipe is "piping" x into the function. We can also specify that we want to place `x`, or some other variable, in another argument of the function, as by default, the pipe passes what's on its left into the first function argument on the right. What we do is put a dot, or `.` in the function call on the right where we want to put our piped variable.
+
+```{r pipeplace}
+
+x %>% mean(na.rm = T, .)
+
+```
+
+### Select
+
+Later on, I'll show some examples where we use multiple lines to clean some data, but let's start learning how to use the dplyr `select` statement.
+
+`select`, as mentioned above, allows the user to select columns from a data frame. The user can select columns either by their name (not in quotes), their column index, or a mix of both. You can also select slices of columns with a structure of `firstcol:lastcol`. This structure will select the first column, and all columns up to the last column based on position. The same can be done with numerical indices. Let's start by looking at the names of our House dataset
 
 ```{r}
 # select and helper functions ---------------------------------------------
 # look at the column names in a data set
 names(House)
+```
 
+Now let's select some columns without the pipe
+
+```{r}
+conflicted::conflict_prefer("select", winner = "dplyr")
+conflicted::conflict_prefer("filter", winner = "dplyr")
 # basic use of the select function. Get columns for pop and households
-select(House, Population, NumberOfHouseholds)
+select(.data = House, Population, NumberOfHouseholds)
+```
 
+Now let's make the same selection, but this time using a pipe
+
+```{r}
 # same as the above code but with a pipe
 House %>% 
   select(County, Population)
+```
 
+Slicing columns
+
+```{r}
 # viewing but not storing output. Using `:` to specify a range of columns
 House %>%
-  select(County:NumberOfHouseholds) %>% View()
+  select(County:NumberOfHouseholds)
+```
 
+storing your values in a data frame with the `<-` operator
+
+```{r}
 # storing your piped operations into a new data frame
 House_cleaned <- House %>%
   select(County:NumberOfHouseholds)
+```
 
+You can negate columns by putting the `-` sign in front of your selection
+
+```{r}
 # negative selection: read as "I want to remove columns 1 through 3 from my data set
 House %>%
   select(-c(1:3))
+```
 
+You can also combine operations by using multiple pipes
+
+```{r}
 # use pipes to string together multiple functions (rm avghousesize and rename population)
 House %>%
   select(-AverageHouseholdSize) %>%
   rename(Pop = Population)
+```
 
+Can also change the order of columns by selecting the columns you want to be ordered, and then selecting everything else
+
+```{r}
 # reorder rows by specifying from left-to-right the order of rows that you want
 House %>% select(Population, everything())
+```
 
+The select function also has a bunch of "selection helpers" that help with more nuanced selection strategies. To read about them, just type `?select` in the console, and pick documentation for the dplyr::select function. I'll show an example below where you can select `any_of` the columns specified. If some columns do not exist in the data frame, no error is thrown, and the columns that do exist are selected
+
+```{r}
 # selects all columns that match but don't throw an error if one entry doesn't match
 House %>% select(any_of(c("County", "notacolumn", "Population")))
 
@@ -688,8 +773,14 @@ House %>% select(any_of(c("County", "notacolumn", "Population")))
 ```
 
 
+### Filtering: Choosing what rows to include
+
+Filtering is the operation you can use to decide which rows you are going to keep in your data. Filtering works by providing boolean operations to the `filter()` function, which then keeps values in your data that return a `TRUE`, and filter out values that return `FALSE`. 
+
+You can also string together conditions with the and `&` and or `|` operators. With `|`, as long as your data satisfy one of the provided conditions, the data value will be kept. With the `&` operator, your data must satisfy all conditions provided to return a TRUE. A filtering example with `|` is shown below, where we want population values that are less than a certain number, and are not NA
+
 ```{r}
-# filtering: similar to select but for rows -------------------------------
+
 # boolean/relational operators:
 # ?`<` #less thaopulationn
 # ?`>` #greater than
@@ -702,10 +793,10 @@ House %>% select(any_of(c("County", "notacolumn", "Population")))
 # ?`&` # bitwise "and"
 # ?`||` # Or for control flow
 # ?`&&` # And for control flow
-# can filter data by boolean operations. With filter(), referring to column names
-# directly within the filter function
-House_filter <- House %>%
-  filter(Population < 605415 & !is.na(Population))
+
+House_filter <- House %>% # select rows with population greater than a value, and county starting with K
+  dplyr::filter(Population > 605415 & grepl(pattern = "^K", County))
+head(House_filter, 5)
 
 # can also compare variables in a dataset to set values 
 MedPop <- median(House_filter$Population)
@@ -717,7 +808,11 @@ House_filter %>%
 # for || and &&, if the first condition is not met, the if statement returns a FALSE
 # immediatesly, whereas with & and |, both elements of the boolean statement are checked
 ```
+### Mutate: Creating new variables
 
+mutate is probably at the same level of ease as making new variables in base R. You simply pipe your data frame into the mutate function, put the name of the new variable on the left of an equal sign, and calculate the value of that new column on the right. You can also assign strings, factors, or change data types.
+
+You can also use mutate to change one variable to a different data type. One common way this is applied is in changing character data into factor or categorical data with the `factor` function. You can also change character data to numeric with `as.numeric`, or vice versa with `as.character`. Below, we'll make some simple new variables.
 
 ```{r}
 # mutate: for creating new variables --------------------------------------
@@ -728,8 +823,33 @@ House %>%
 
 # base R version: less neat IMO
 House$NumbHouse = House$Population/House$AverageHouseholdSize
+```
 
-# summarize: for creating aggregate summaries of data ---------------------
+Changing County to a factor variable
+
+```{r}
+House %>%
+  mutate(County = factor(County)) %>%
+  str()
+```
+
+We could also change average household size to a factor by rounding, and doing the factor transformation
+
+```{r}
+House_fac <- House %>%
+  mutate(Householdfac = factor(round(AverageHouseholdSize, 0)))
+
+str(House_fac)
+table(House_fac$Householdfac)
+```
+
+### Summarise: creating aggregate summaries
+
+The `summarise` function takes the data you provide, and collapses that data across multiple aggregation functions like `sum`, `sd`, `median`, etc... This proves extremely useful for making summary tables with a wide range of flexibility in what sorts of statistics you decide to include in your final table. Below, we'll remove all non-numeric variables from our data frame, and calculate some basic summary statistics. 
+
+Summarise is similar to mutate, except that summarise goes one step farther and aggregates, reducing the number of rows in the output compared to the input (usually). Mutate maintains the number of rows.
+
+```{r}
 library(moments) # for skewness and kurtosis
 
 
@@ -751,28 +871,45 @@ House_new %>%
 # ?quantile()
 ```
 
+as you can see, our summary statistics don't have to be of only one variable. Each new variable we create in the `summarise` function becomes a new column in our output. But what if we don't want to summarise across our entire data frame? What if we want to compare groups of observations across each other?
+
+### group_by: for making group-specific summaries
+
+For group_by, we're going to look at the starwars dataset, as it has some interesting groups through which we can group:
 
 ```{r}
-# group_by: for making summaries and vars group-specific ------------------
 group_data <- starwars
+head(starwars)
+```
 
+group_by doesn't necessarily do anything to the data itself, it primes the data for analysis. It tells R that within a data frame, there are separate groups that we want to analyse separately, while keeping them together in the same data frame. If we group by `eye_color`, and calculate the mean mass of individuals in the data set, R will return summary statistics of the mean mass of individuals belonging to each eye color. We can also group by multiple columns, like `eye_color` and `skin_color`, which would give us returned masses categorized by eye and skin color combinations:
+
+```{r}
 # group_by creates implicit groups in your data to perform group-wise operations
 # remember: group_by doesn't perform any operations on our data, but the groupings
 # are applied to operations later on 
 
 group_data %>%
   group_by(eye_color) %>%
-  summarise(grp_mass = mean(mass, na.rm = T))
+  summarise(grp_mass = mean(mass, na.rm = T),
+            count = n())
 
 group_data %>%
   group_by(eye_color, skin_color) %>%
-  summarise(grp_mass = mean(mass, na.rm = T))
+  summarise(grp_mass = mean(mass, na.rm = T),
+            count = n())
 
 ```
 
-```{r Summarise}
-# TODO: Need to make a section on the summarise function
-```
+We can also see by the rows of each table that there are 15 unique eye colors, and 53 unique eye and skin color combinations. we can also count the number of observations in each category with the `n()` function.
+
+---
+
+That was some basic coverage of the dplyr verbs that you can use to mold your data to how you see fit. Remember that best practices when adjusting your data is to make it so that each column is a unique variable, and each row is a unique observation. **Rows should not repeat in a data frame. This takes up extra storage and can mess with analysis results.** 
+
+As a quick recap, use `select` to choose your columns by numerical index, name, or `select` helper functions. `filter` can help you select rows with boolean operations. `rename` (which we didn't cover a lot) simply renames your variables. `mutate` allows you to create new variables. `summarise` allows you to aggregate your data into convenient summary tables. `group_by` lets you take `summarise` one step further by allowing you to group your summaries by other variables in your data frame.
+
+These dplyr functions are probably the best data wrangling tools that you have in R, and mastery of these tools will probably get you 80-90% of the way through any data cleaning and analysis process. I keep hearing people say that 80% of the work done in data analysis is data cleaning...
 
 
 ## `readr`, `haven`, ``readxl``, and other functions for reading data
