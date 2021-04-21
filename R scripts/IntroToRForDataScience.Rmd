@@ -5,6 +5,7 @@ date: "3/25/2021"
 output: 
   html_document:
     toc: True
+    toc_float: True
     highlight: zenburn
 ---
 
@@ -12,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 rm(list = ls())
 if (!require(tidyverse)) install.packages('tidyverse');library(tidyverse)
-if (!require(todor)) install.packages("todor");library(todor)
+# if (!require(todor)) install.packages("todor");library(todor)
 # todor()
 ```
 
@@ -22,7 +23,7 @@ This markdown is meant to be a quick introduction to get students up to speed wi
 
 This markdown document will be available to view and download from my github while in production. Just keep in mind that just because a topic isn't covered on this document doesn't mean that it won't be covered in the future. I'm considering this as a working document, and it likely will be for a very long time
 
-# 1.0-Basic Arithmetic
+# Basic Arithmetic
 
 ```{r}
 10 + 7
@@ -38,7 +39,7 @@ This markdown document will be available to view and download from my github whi
 ```
 
 
-# 2.0-Storing data in variables
+# Storing data in variables
 
 In R, you can use two different operators to store data in the form of a variable. You could go for the traditional `=` to store information, like saying `x = 15*25`. However, best practices in R is to use the assignment operator, `<-`, as in `x <- 15*25`. Intuitively, this can be read as "Storing the result of 15*25 into the variable x".
 
@@ -51,7 +52,7 @@ print(x)
 ## same result
 ```
 
-However, variables can store much more than single numbers. Variables can store just about anything in R. Variables can store things like formulas: `outcome ~ pred1 + pred2 + pred3` used for making models. You can also store strings, lists, factors, data frames, vectors, plots and complicated visuals. Almost anything you can imagine in R can be stored as a variable.
+However, variables can store much more than single numbers. Variables can store just about anything in R. Variables can store things like formulas: `outcome ~ pred1 + pred2 + pred3` used for making models. You can also store strings, lists, factors, data frames, vectors, ggplots and complicated visuals. Almost anything you can imagine in R can be stored as a variable.
 
 
 # Data types
@@ -68,17 +69,19 @@ double <- 3.141592
 print(double)
 date <- Sys.Date()
 print(date)
-factor_data <- as.factor(c("King", "Queen", "Rook"))
-print(factor_data)
+factor_data <- as.factor(c("King", "Queen", "Rook", "King", "Queen", "Rook", "Pawn", "Pawn", "Bishop"))
+table(factor_data)
 bool <- 1 == 1
 bool
 otherbool <- 1 > 5
 otherbool
+literalbool <- TRUE
+literalbool
 ```
 
 ## Vectors
 
-Vectors can be considered as 1-dimensional collections of data. By 1-dimensional, I mean that a vector can either have 1 row and many columns, or one column and many rows (it really doesn't make a difference). There are a bunch of ways to make vectors in R, but the two most common ones are the `c()` function for combining data elements, and the `vector()` function, which actually lets you make much more than just a vector
+Vectors can be considered as 1-dimensional collections of data. By 1-dimensional, I mean that a vector can either have 1 row and many columns, or one column and many rows (it really doesn't make a difference). There are a bunch of ways to make vectors in R, but the two most common ones are the `c()` function for combining data elements, and the `vector()` function, which actually lets you make much more than just a vector. `vector()` also allows you to specify which data type you will store in the vector, and is good for making empty vectors of a specified size, which you can populate with for or while loops.
 
 ```{r Vector}
 vec1 <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
@@ -88,16 +91,14 @@ vec2 <- seq(1, 10, by = 1)
 vec2
 vec1 == vec2
 
-vector(mode = "double", length = 50) # this creates an empty vector that you can populate later
+vector(mode = "integer", length = 50) # this creates an empty vector that you can populate later
 
 ```
 
 
-## Indexing
+### Indexing Vectors
 
 Indexing is relatively straightforward in R. Elements in a data structure are intuitively indexed from 1 to however many data elements are in that structure. For example, a vector holding the letters of the alphabet would be indexed with "a" having an index of 1, "b" with an index of 2, and "c" having an index of 3...
-
-### Indexing Vectors
 
 We can easily index elements with square brackets placed after the variable that a vector is stored in:
 
@@ -106,6 +107,7 @@ vec1 <- seq(500, 1, by = -15)
 print(vec1)
 vec1[1] # the first element
 vec1[length(vec1)] # the last element
+vec1[c(1, length(vec1))] # get multiple elements by combining indices with c()
 ```
 
 You can also specify a range of elements that you want to index
@@ -115,6 +117,10 @@ vec1[5:25]
 
 # or we can grab every other index
 vec1[seq(5, 25, by = 2)]
+
+# what does this seq function do?
+seq(5, 25, by = 2)
+# here, we see it makes a sequence of numbers from 5 to 25, counting by 2
 
 # or we can remove an element by its index
 vec3 <- vec1[-c(15, 25, 30)]
@@ -142,7 +148,7 @@ y != z
 
 The cool thing that we can do with these boolean TRUE/FALSE values, is that we can use them to index our data with specific conditions! If we place a boolean comparison within `[]`, R will evaluate whether elements in the data structure are TRUE or FALSE, keeping the TRUE values, and removing the FALSE values.
 
-First I'll show you whats happening before the indexing
+First I'll show you what happens when we apply a boolean comparison to a vector:
 
 ```{r}
 vec1 < 250
@@ -200,7 +206,7 @@ In this way, you can access elements of your list either using a numerical index
 
 ```{r}
 mylist_named$bool
-mylist_named$formula
+mylist_named$formula[[3]][[2]]
 ```
 
 Lists are extremely important to know how to work with, as many functions in R return output in the form of a list. Some examples are the `summary` function, the `lm` and `glm` functions for making models. You can also reassign portions of lists using indexing and the assignment operator
@@ -265,6 +271,7 @@ We can easily make new variables for data frames with the `$` operator
 
 ```{r}
 random_data$newvar <- rep(c("silly", "billy"), 2)
+random_data[['newvar']] <- rep(c("silly", "billy"), 2)
 random_data
 ```
 
@@ -282,11 +289,11 @@ random_data
 
 Packages increase the range of functionality in your R scripts. However, if there is something that is extremely simple to do, don't rely on an external package to do it. Oftentimes packages can change, functions become deprecated, and the world moves on. If you write the code for a function yourself, you don't have to worry about things changing. That being said, R is very good about maintaining packages and keeping them functional. Just make sure you know what a function does before you use it for getting research results
 
-You only need two functions for package management: `install.packages()` does what is says it does, and `library()` activates your package within your R session. An added bonus is the `require()` function, which checks if the package doesn't exist in your library. If the package doesn't exist, require returns a `FALSE` value and a warning, whereas `library()` throws an error. If you're sharing packages with colleagues, you can include the following at the top of your code for each package that is required to run your script:
+You only need two functions for package management: `install.packages()` does what is says it does, and `library()` activates your package within your R session. An added bonus is the `require()` function, which checks if the package does or does not exist in your library. If the package doesn't exist, require returns a `FALSE` value and a warning, whereas `library()` throws an error. If you're sharing packages with colleagues, you can include the following at the top of your code for each package that is required to run your script:
 
-`if !require("packagename"); install.packages("packagename"); library(packagename)`
+`if (!require("packagename")) install.packages("packagename"); library(packagename)`
 
-Read left to right in plain english the above statement says: If this package does not exist, install this package, and then activate the package from the library. This line of code will only install a package if it does not exist in the current library, and prevents unwanted updates if someone already has the package installed. That being said, if you want to update a package, just run `install.packages()` on that package again.
+Read left to right in plain English the above statement says: If this package does not exist, install this package, and then activate the package from the library, and if the package already exists in the library, activate it. This line of code will only install a package if it does not exist in the current library, and prevents unwanted updates if someone already has the package installed. That being said, if you want to update a package, just run `install.packages()` on that package again.
 
 # Functions
 
@@ -300,71 +307,77 @@ There are too many built-in functions to use in R for me to go over, so I'll jus
 
 ```{r echo = FALSE, results = 'hide', message = FALSE, warning = FALSE}
 # for basic summary statistics
-mean
-min
-max
-median
-sd
-var
-quantile
-summary
+# mean
+# min
+# max
+# median
+# sd
+# var
+# quantile
+# summary
 
 # for working with and combining strings
-paste
-paste0
-substr
-cat
+# paste
+# paste0
+# substr
+# cat
 
 # pattern matching of strings
-grep # returns a vector of indices or of elements in x that yields a match
-grepl # returns a TRUE or FALSE if there is a pattern match
+# grep # returns a vector of indices or of elements in x that yields a match
+# grepl # returns a TRUE or FALSE if there is a pattern match
 
 # finding the index of something
-which
+# which
 
 # simple plotting
-plot
-boxplot
-hist
+# plot
+# boxplot
+# hist
 
 # Exploring the type of your data
-class
-str
+# class
+# str
 
 # for making data frames, lists, vectors, and concatenating
-data.frame
-as.data.frame
-list
-vector
-matrix
-c
+# data.frame
+# as.data.frame
+# list
+# vector
+# matrix
+# c
 
 # The apply family: Applying functions across lists or data frames
-lapply
-vapply
-sapply
-apply
+# lapply
+# vapply
+# sapply
+# apply
 
 # for setting up your random number generators--reproducible randomness
-set.seed
+# set.seed
 
 # random number generators for various distributions
-runif
-rbinom
-rbeta
-rcauchy
-rchisq
-rnorm
-rgamma
-rgeom
-rlnorm
-rpois
-rstudent
-rt
+# runif
+# rbinom
+# rbeta
+# rcauchy
+# rchisq
+# rnorm
+# rgamma
+# rgeom
+# rlnorm
+# rpois
+# rstudent
+# rt
 
 # get the current date and/or time
-Sys.Date
-Sys.time
+# Sys.Date
+# Sys.time
+
+# check if a piece of data is within a vector
+# %in%
+
+# can also check if something is not in a vector by making your own function
+#`%notin%` <- Negate(`%in%`)
 
 # and if you ever want to explore what a function does, type the name of the function in the console, and press enter after it. This will pull up the code contained in the function. Reading source code is a bit of an advanced topic, but it's a good way to see how others write their functions, and can give you an idea of what's happening under the hood
 ```
@@ -408,7 +421,7 @@ Some details:
 + A simple way to visualize this is to look at the body of the `SayHi` code. Any location where you see the variable `name`, the string "Kees" will be substituded there. This is a basic overview of how arguments work inside of functions. 
 + Obviously, there are more complicated applications of functions, but once you have the basic syntax, and understand how arguments and the `return` function works, you're at a good starting point
 
-### Control flow (AKA if...else if...else)
+### Control flow (AKA if, else if, else)
 
 You can use what is called "control flow" to have your script make analysis decisions for you! This is an extremely powerful capability that's available in every programming language you ever see, so once you learn how to use if-else statements in R, you can use this concept in any other programming language.
 
@@ -650,6 +663,8 @@ Kenya_All <- tt_load(2021, week = 4)
 Kenya_All
 
 House <- Kenya_All$households
+Crops <- Kenya_All$crops
+gender <- Kenya_All$gender
 
 # ?magrittr::`%>%`
 # ?dplyr::select
@@ -773,7 +788,7 @@ House %>% select(any_of(c("County", "notacolumn", "Population")))
 ```
 
 
-### Filtering: Choosing what rows to include
+### Filter: Choosing what rows to include
 
 Filtering is the operation you can use to decide which rows you are going to keep in your data. Filtering works by providing boolean operations to the `filter()` function, which then keeps values in your data that return a `TRUE`, and filter out values that return `FALSE`. 
 
@@ -911,14 +926,173 @@ As a quick recap, use `select` to choose your columns by numerical index, name, 
 
 These dplyr functions are probably the best data wrangling tools that you have in R, and mastery of these tools will probably get you 80-90% of the way through any data cleaning and analysis process. I keep hearing people say that 80% of the work done in data analysis is data cleaning...
 
+### Practical Data wrangling example with string data
+
+Often, when given a dataset with many names, the names may be non-standardized, include extra white spaces, or have misspellings that make working with such data difficult. I'll take us through a practical example of how to clean such data with the rest of the kenya data that we read in earlier. We should have three datasets named `Crops`, `gender`, and `House`, which should all have one observation for each county in Kenya, all containing different information such as number of men and women in a county, yield of specific crops, Population, average household size, and the number of households.
+
+These three datasets have a primary key, which is the variable `County` (named `Subcounty` in Crops, which we need to fix...). Let's first start by making sure that all county columns have the same name with identical capitalization:
+
+```{r}
+Crops_rename <- Crops %>%
+  rename(County = SubCounty)
+names(Crops_rename)
+```
+
+now we can use some utility functions to see how our county columns look. We can see if there are differences in county names between data frames
+
+```{r}
+unique(Crops_rename$County)
+unique(gender$County)
+unique(House$County)
+```
+
+As we can see, our county names are somewhat messy. The crops df has all caps county names, the gender df looks all-right, but the House df has some whitespace following all county entries. There are two simple things we can do to clean this up. First, we can use the function `tolower()` to transition the county names to lowercase, and we can use the function `trimws()` to trim the white space off of the end of the house dataframe.
+
+Because this is a procedure we want to pass to all three data frames, I'll show you how to functionalize this data cleaning portion so that we can reduce the process to one line of code
+
+```{r}
+# how we would clean the data the hard-coding way
+House_lower <- House %>%
+  mutate(ClCounty = tolower(County),
+         ClCounty = trimws(ClCounty))
+House_lower$ClCounty
+```
+
+Because we want to have variable names be consistent across data frames, we can keep ClCounty as the consistent new variable for Clean County names. We then just need to give an option for the user to specify an input data frame, and a variable that we are going to (1) change to lower case and (2) trim the leading and trailing whitespace from. We'll also arrange our colums in alphabetical order to make comparisons easier. Here's the function that we could construct
+
+```{r}
+TrimAndLower <- function(df, var) {
+  output <- df %>%
+    mutate(ClCounty = tolower({{var}}),
+           ClCounty = trimws(ClCounty)) %>%
+    arrange(ClCounty)
+  return(output)
+}
+```
+
+The double brackets are the tidyverse's way of saying "hold off on evaluating the `var` argument until you get to the double brackets, then evaluate me as a variable within a data frame." If we didn't have the double curly braces in our function, R would immediately try to evaluate the `var` argument, and throw an error, because it wouldn't know what we are referring to (because the variable by itself isn't defined in our global environment. It is only defined in the context of our data frame).
+
+Here's some application of our function:
+
+```{r}
+House_lower <- TrimAndLower(House, County)
+Crops_lower <- TrimAndLower(Crops_rename, County)
+gender_lower <- TrimAndLower(gender, County)
+House_lower$ClCounty
+Crops_lower$ClCounty
+gender_lower$ClCounty
+```
+
+Now, each data frame has a column called `ClCounty` with trimmed whitespaces and all lowercase. Now we need a way to check if there are differences between columns. We can do this with a setdiff function, which returns values from a vector x that are not in a vector y. However, we have to do this both ways to see the values of y that are not in x. We can also make this into a small function
+
+```{r}
+finddiffs <- function(x, y) {
+  return(c(setdiff(x, y), setdiff(y, x)))
+}
+
+finddiffs(House_lower$ClCounty, Crops_lower$ClCounty)
+finddiffs(House_lower$ClCounty, gender_lower$ClCounty)
+finddiffs(gender_lower$ClCounty, Crops_lower$ClCounty)
+
+```
+
+Here we can see some common threads that are giving us problems in creating matching names. Certain counties are two words in one data set, and one word in another. Also, nairobi city is also spelled as one continuous word, and again as nairobi. There are a couple of things we can do to solve these problems. (1) We can remove more whitespace by trimming all white space within strings (between words); (2) we can get rid of any instance of the word "city" from our ClCounty column; and (3) we need to convert any instances of "Kenya" to Total, as instances of "Kenya" represent combined statistics of the "Total" country. Let's do this the non-function way first
+
+```{r}
+House_clname <- House_lower %>%
+  mutate(ClCounty = str_replace_all(ClCounty, pattern = c(" " = "", "city" = "")),
+         ClCounty = ifelse(grepl("kenya", ClCounty, ignore.case = TRUE), "Total", ClCounty))
+
+House_clname$ClCounty
+```
+
+We can now functionalize this to make it applicable to the other three data frames
+
+```{r}
+rmSpaceCity <- function(df, var){
+  output <- df %>%
+    mutate(ClCounty = str_replace_all({{var}}, pattern = c(" " = "", "city" = "")),
+           ClCounty = ifelse(grepl("kenya", {{var}}, ignore.case = TRUE), "total", {{var}}))
+  return(output)
+}
+
+Crops_rmspace <- rmSpaceCity(Crops_lower, ClCounty)
+gender_rmspace <- rmSpaceCity(gender_lower, ClCounty)
+House_rmspace <- rmSpaceCity(House_lower, ClCounty)
+```
+
+Let's check if there are any remaining differences in our county names
+
+```{r}
+finddiffs(Crops_rmspace$ClCounty, gender_rmspace$ClCounty)
+finddiffs(Crops_rmspace$ClCounty, House_rmspace$ClCounty)
+```
+
+we did it! our `finddiffs` function didn't return anything, so we know that the columns for ClCounty are identical across all of our datasets. Now we can merge everything into one combined dataset for analysis. We can do this using some of R's nifty `join` functions, namely `left_join()`, `right_join()`, `inner_join()`, and `full_join()`. left keeps all columns on the left regardless of the right data frame, right does the reverse. Inner joins keep only columns that have matching keys in both data frames, while full join keeps all columns regardless of whether they have matches in one data frame or another. Here, our primary key, or `ClCounty` is identical across all data frames, so it doesn't really matter what type of join we use. I generally default to `left_join()` in this case. The cool thin about the tidyverse is that we can chain these joins together as opposed to having to write them out as separate chunks of code. I would only recommend doing this is you are **absolutely sure** that your key names are identical. Otherwise, if something goes wrong, it is difficult to find where it happened
+
+```{r}
+Kenya_df <- House_rmspace %>%
+  left_join(gender_rmspace, by = "ClCounty") %>%
+  left_join(Crops_rmspace, by = "ClCounty")
+
+head(Kenya_df)
+```
+
+Now we have all of these `County.suffix` variables, which R creates when you join dfs with identical column names that aren't used as a key. We can get rid of those quickly with the `select` function and a select helper `starts_with()`
+
+```{r}
+Kenya_short <- Kenya_df %>%
+  select(-starts_with("County", ignore.case = TRUE)) %>%
+  select(ClCounty, everything())
+# put ClCounty as the first column, since it's an identifier
+head(Kenya_short)
+```
+
+Now we have a relatively clean dataset that we can work with! Let's make a couple variables that might be of interest to us, including % breakdowns by gender and percentage breakdowns of agricultural product compared to the total yield
+
+```{r}
+# creating a set of percent gender variables:
+Kenya_pct <- Kenya_short %>%
+  mutate(pct_male = (Male/Population)*100,
+         pct_female = (Female/Population)*100,
+         pct_intersex = (Intersex/Population)*100) %>%
+  mutate(across(.cols = Tea:`Khat (Miraa)`, ~(./Farming)*100, .names = "pct_{.col}"))
+
+Kenya_pct
+
+```
+
+The percentage of farmed crops will not add up to 100%, as there are some miscalculations in the data, where the components of farmed crops add up to be more than the total population of farmers. If we wanted to plot gender data, it would be helpful to change the format from wide to long formats, so that all of the types of gender are in one column, and the percentage of gender is in another. We can do this using dplyr's `pivot_longer()` function, which takes as input (1) the columns you want to pivot; (2) then name of the column that you want to place the variable names in, and (3) the name of the column that you want to put your values in. Here's an example below:
+
+```{r}
+Kenya_long <- Kenya_pct %>%
+  pivot_longer(cols = c(Male:Intersex),
+               names_to = "Gender",
+               values_to = "Number") %>%
+  filter(ClCounty != 'total')
+```
+
+And now we can visualize differences in population percentages by gender!
+
+```{r}
+Kenya_long %>%
+  ggplot(aes(x = reorder(ClCounty, Population), y = Number, fill = Gender)) +
+  geom_col(position = "stack") +
+  scale_y_continuous(expand = c(0, 0)) +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 6)) +
+  labs(title = "Population by Gender in Kenya Counties")
+```
+
 
 ## `readr`, `haven`, ``readxl``, and other functions for reading data
 
-# Exploratory Data Analysis-Summary statistics and groupings
+```{r}
+if (!require(readr)) install.packages("readr");library(readr)
+if (!require(haven)) install.packages('haven');library(haven)
+if (!require(readxl)) install.packages('readxl');library(readxl)
+```
 
-## Base R
-
-## Dplyr
 
 # Exploratory Data Analysis-Visualizing your data
 
@@ -1200,7 +1374,6 @@ week <- 1
 daycount <- 0
 MAWeekday$week <- 0
 for (i in 1:nrow(MAWeekday)){
-  print(week)
   MAWeekday$week[i] <- week
   daycount <- daycount + 1
   
