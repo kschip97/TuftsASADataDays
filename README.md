@@ -47,3 +47,7 @@ This Rmarkdown file goes through how to use Rmarkdown to create aesthetic report
 
 This script specifically focuses on pivoting data to get that data into the shape that you need for analysis. This script uses `pivot_longer()` and `pivot_wider()` to manipulate data, and applications of pivoted data in analysis and ggplot are utilized, as pivoting is usually necessary to make faceted plots.
 
+## IntroToRForDataScience.Rmd
+
+This script is a project that is currently in the works. This script attempts to introduce individuals to basic data science programming concepts in R, including introductory plotting, manipulating data, tidyverse functions, and a couple of other packages that I use in my R day-to-day. This script is still being updated, so there are likely many mistakes, so please forgive me for the time being.
+
